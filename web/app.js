@@ -45,6 +45,7 @@
     rightSvr: $("#right-svr"),
     verdict: $("#verdict"),
     export: $("#export"),
+    copy: $("#copy"),
     reset: $("#reset"),
     version: $("#version"),
     footerVersion: $("#footer-version"),
@@ -74,6 +75,7 @@
   els.phaseLf.addEventListener("click", () => measurePhase("lf"));
   els.phaseHf.addEventListener("click", () => measurePhase("hf"));
   els.export.addEventListener("click", exportJson);
+  els.copy.addEventListener("click", copyJson);
   els.reset.addEventListener("click", resetSession);
 
   document.querySelectorAll("[data-ear]").forEach((button) => {
@@ -476,6 +478,7 @@
     els.phaseHf.disabled = disabled;
     els.reconnect.disabled = disabled;
     els.export.disabled = disabled || !hasAnyCapture();
+    els.copy.disabled = disabled || !hasAnyCapture();
     els.reset.disabled = disabled;
   }
 
@@ -483,8 +486,8 @@
     return Object.values(state.captures).some((capture) => Number.isFinite(capture?.lfDb) || Number.isFinite(capture?.hfDb));
   }
 
-  function exportJson() {
-    const payload = {
+  function buildPayload() {
+    return {
       app: "SonicCare PWA",
       version: VERSION,
       generatedAt: new Date().toISOString(),
@@ -500,6 +503,10 @@
       thresholds: THRESHOLDS,
       note: "Relative SVR check. Bluetooth speech audio is band-limited and uncalibrated. Not a medical diagnosis.",
     };
+  }
+
+  function exportJson() {
+    const payload = buildPayload();
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -509,6 +516,25 @@
     link.click();
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  async function copyJson() {
+    const text = JSON.stringify(buildPayload(), null, 2);
+    try {
+      await navigator.clipboard.writeText(text);
+      els.testStatus.textContent = "JSON copied. Paste it in the chat.";
+    } catch {
+      const area = document.createElement("textarea");
+      area.value = text;
+      area.setAttribute("readonly", "");
+      area.style.position = "fixed";
+      area.style.opacity = "0";
+      document.body.appendChild(area);
+      area.select();
+      try { document.execCommand("copy"); } catch { /* no clipboard */ }
+      area.remove();
+      els.testStatus.textContent = "JSON copied. Paste it in the chat.";
+    }
   }
 
   function resetSession() {
