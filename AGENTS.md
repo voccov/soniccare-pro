@@ -9,7 +9,7 @@ check, a plain-language report, and a safe cleaning guide. A small PWA validatio
 tests the acoustic method before the native build. English first; Swedish is a later
 locale. Owner-facing and mobile-first.
 
-Status: Phase 0A/0B — proof. Plan revision `0.1.0-dev.3`. Do not scaffold beyond the
+Status: Phase 0A/0B — proof. Plan revision `0.1.0-dev.4`. Do not scaffold beyond the
 Phase 0 spike until the go/no-go review passes.
 
 ## Settled decisions

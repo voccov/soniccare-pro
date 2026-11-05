@@ -1,15 +1,19 @@
 # Setup — GitHub and SideStore
 
-This is the one-time setup. It is the only part that cannot be automated: GitHub must
-authorize this server, and SideStore must be installed on the iPhone from a computer with
-a USB cable. After that, builds and updates are one tap.
+> **Current state:** the public repo is created and the deploy key is connected, so
+> sections 1–2 are done. Start at section 3 (spare Apple ID) or section 5 (SideStore).
+> The native self-test IPA is already built.
+
+This is the one-time setup. It is the only part that cannot be automated: SideStore must be
+installed on the iPhone from a computer with a USB cable. After that, builds and updates are
+one tap.
 
 **Never send a password, Apple ID password, or two-factor code in chat.** The Apple ID
 sign-in happens on your own computer and phone.
 
 ---
 
-## 1. GitHub — create the repo
+## 1. GitHub — create the repo (done)
 
 1. Open this link:
 
@@ -25,7 +29,7 @@ sign-in happens on your own computer and phone.
 If you prefer a private repo, create it as **Private** and tell me. The free build still
 works, but the IPA then has to be hosted on this server instead of a public release.
 
-## 2. GitHub — connect this server with a deploy key
+## 2. GitHub — connect this server with a deploy key (done)
 
 I will send one **public** key in the chat after you send the repo URL. A deploy key is
 safer than a password or a broad token.
@@ -111,10 +115,11 @@ Swedish version of the docs (optional):
 
 When the repo is connected and SideStore works:
 
-1. I push the plan and the Phase 0 spike.
+1. The plan and Phase 0 spike are already pushed.
 2. GitHub Actions builds an unsigned IPA on macOS.
-3. I send a `sidestore://install?url=...` link.
-4. Tap it on the iPhone. SideStore signs and installs the app.
+3. Open <https://voccov.github.io/soniccare-pro/install.html> on the iPhone and tap
+   **Install in SideStore**.
+4. SideStore signs and installs the app.
 5. The app appears on the Home Screen. Open it and run the self-test.
 6. Every update: tap the new link, or use **Update** in SideStore.
 7. Every 7 days: keep LocalDevVPN on Wi-Fi; SideStore refreshes automatically. If the app
@@ -122,10 +127,10 @@ When the repo is connected and SideStore works:
 
 ## What to send back
 
-- The GitHub repo URL.
 - The iPhone iOS version.
 - Confirmation that SideStore is installed and refreshed.
 - Confirmation that the spare Apple ID is ready (no email or password).
+- The exact text or a screenshot of any SideStore error.
 
 That is everything. The rest is automated.
 

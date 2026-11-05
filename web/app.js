@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "0.1.0-dev.3";
+  const VERSION = "0.1.0-dev.4";
   const STORAGE_KEY = "soniccare.pwa.v1";
   const DRY_KEY = "soniccare.dryUntil";
   const SCRATCH_THRESHOLD_DB = 18;
@@ -17,6 +17,7 @@
   };
 
   const $ = (selector) => document.querySelector(selector);
+  const earButtons = document.querySelectorAll("[data-ear]");
   const els = {
     intro: $("#intro"),
     session: $("#session"),
@@ -116,9 +117,10 @@
   window.addEventListener("beforeunload", stopAudio);
 
   function selectEar(ear) {
+    if (state.busy) return;
     if (ear !== "left" && ear !== "right") return;
     state.activeEar = ear;
-    document.querySelectorAll("[data-ear]").forEach((button) => {
+    earButtons.forEach((button) => {
       button.classList.toggle("selected", button.dataset.ear === ear);
     });
     els.earLabel.textContent = ear === "left" ? "Left" : "Right";
@@ -138,24 +140,36 @@
       let context;
       let label;
       let sampleRate;
-      let demoOsc = null;
+      let demoOscs = [];
 
       if (demo) {
         context = new AudioContextClass();
         await context.resume();
-        const oscillator = context.createOscillator();
-        const gain = context.createGain();
         const destination = context.createMediaStreamDestination();
-        oscillator.type = "sine";
-        oscillator.frequency.value = 220;
-        gain.gain.value = 0.025;
-        oscillator.connect(gain);
-        gain.connect(destination);
-        oscillator.start();
+
+        // Two tones exercise both SVR bands. They are not a diagnosis.
+        const lfOsc = context.createOscillator();
+        const lfGain = context.createGain();
+        lfOsc.type = "sine";
+        lfOsc.frequency.value = 220;
+        lfGain.gain.value = 0.03;
+        lfOsc.connect(lfGain);
+        lfGain.connect(destination);
+        lfOsc.start();
+
+        const hfOsc = context.createOscillator();
+        const hfGain = context.createGain();
+        hfOsc.type = "sine";
+        hfOsc.frequency.value = 4500;
+        hfGain.gain.value = 0.02;
+        hfOsc.connect(hfGain);
+        hfGain.connect(destination);
+        hfOsc.start();
+
+        demoOscs = [lfOsc, hfOsc];
         stream = destination.stream;
         label = "Demo signal";
         sampleRate = context.sampleRate;
-        demoOsc = oscillator;
       } else {
         if (!navigator.mediaDevices?.getUserMedia) {
           throw new Error("This browser does not expose microphone access. Open the HTTPS GitHub Pages link in Safari.");
@@ -188,7 +202,7 @@
         source,
         analyser,
         track,
-        osc: demoOsc,
+        oscs: demoOscs,
         demo,
         label,
         sampleRate,
@@ -230,9 +244,9 @@
   function stopAudio(silent = false) {
     cancelAnimationFrame(state.spectrumRAF);
     if (state.audio) {
-      if (state.audio.osc) {
-        try { state.audio.osc.stop(); } catch { /* already stopped */ }
-      }
+      (state.audio.oscs || []).forEach((oscillator) => {
+        try { oscillator.stop(); } catch { /* already stopped */ }
+      });
       if (state.audio.track) state.audio.track.onended = null;
       state.audio.stream.getTracks().forEach((track) => track.stop());
       state.audio.context.close().catch(() => {});
@@ -247,6 +261,19 @@
     await enableMic(false, true);
   }
 
+  function looksLikeBluetooth(label) {
+    return /airpods|bluetooth|headset|hands.?free|wireless/i.test(label || "");
+  }
+
+  function inputSnapshot() {
+    return {
+      label: state.audio?.label || "",
+      sampleRate: Number(state.audio?.sampleRate) || 0,
+      contextRate: Number(state.audio?.contextRate) || 0,
+      demo: Boolean(state.audio?.demo),
+    };
+  }
+
   function updateInputUi() {
     if (!state.audio) return;
     const { label, sampleRate, contextRate, demo } = state.audio;
@@ -255,12 +282,12 @@
       els.routeBadge.textContent = "Demo";
       els.routeBadge.className = "badge warn";
       els.sampleRate.textContent = `${formatRate(sampleRate)} Hz`;
-      els.routeNote.textContent = "Synthetic 220 Hz tone. Results are not your AirPods.";
+      els.routeNote.textContent = "Synthetic 220 Hz + 4.5 kHz tones. Results are not your AirPods.";
       els.bandLabel.textContent = `High band: ${highBandLabel()}`;
       setStatus("Demo signal", "warn");
       return;
     }
-    const looksBluetooth = /airpods|bluetooth|headset|hands.?free|wireless/i.test(label);
+    const looksBluetooth = looksLikeBluetooth(label);
     els.inputLabel.textContent = label;
     els.routeBadge.textContent = looksBluetooth ? "AirPods / Bluetooth" : "Check input";
     els.routeBadge.className = `badge ${looksBluetooth ? "good" : "warn"}`;
@@ -393,6 +420,7 @@
     }
     state.busy = false;
     updateButtons();
+    renderReport();
     saveState();
   }
 
@@ -401,6 +429,7 @@
     state.busy = true;
     updateButtons();
     const isLf = kind === "lf";
+    const ear = state.activeEar;
     const label = isLf ? "Ahh" : "Ssss";
     els.phaseBadge.textContent = "Get ready";
     els.phaseBadge.className = "badge warn";
@@ -412,6 +441,15 @@
       await delay(500);
     }
 
+    const input = inputSnapshot();
+    if (!state.audio) {
+      state.busy = false;
+      updateButtons();
+      els.phaseBadge.textContent = "Input lost";
+      els.phaseBadge.className = "badge warn";
+      els.testStatus.textContent = "The input disconnected. Tap Reconnect input.";
+      return;
+    }
     const analyser = state.audio.analyser;
     const timeData = new Float32Array(analyser.fftSize);
     const freqData = new Float32Array(analyser.frequencyBinCount);
@@ -428,6 +466,7 @@
     const started = performance.now();
 
     while (activeMs < 3000 && performance.now() - started < 10000) {
+      if (!state.audio) break;
       const now = performance.now();
       const dt = Math.min(50, now - last);
       last = now;
@@ -457,6 +496,15 @@
       await delay(20);
     }
 
+    if (!state.audio) {
+      state.busy = false;
+      updateButtons();
+      els.phaseBadge.textContent = "Input lost";
+      els.phaseBadge.className = "badge warn";
+      els.testStatus.textContent = "The input disconnected. Tap Reconnect input.";
+      return;
+    }
+
     if (activeMs < 2500 || frames === 0) {
       els.phaseBadge.textContent = "No signal";
       els.phaseBadge.className = "badge warn";
@@ -467,12 +515,11 @@
     }
 
     const dbFor = (key) => dbFromPower(sums[key] / frames);
-    const ear = state.activeEar;
     const capture = state.captures[ear] || {
       ear,
-      demo: Boolean(state.audio.demo),
-      trackLabel: state.audio.label,
-      trackSampleRate: state.audio.sampleRate,
+      demo: false,
+      trackLabel: input.label,
+      trackSampleRate: input.sampleRate,
       lfDb: null,
       hfDb: null,
       svrDb: null,
@@ -480,6 +527,8 @@
 
     if (isLf) {
       capture.lfDb = dbFor("lf");
+      capture.lfInput = input;
+      capture.lfDemo = input.demo;
     } else {
       const hfWideDb = dbFor("hfWide");
       const midDb = dbFor("mid");
@@ -492,15 +541,17 @@
       capture.hfBand = narrow ? "2–3.5 kHz" : "3–6.5 kHz";
       capture.bandwidth = narrow ? "8 kHz / narrow" : "wideband";
       capture.confidence = narrow ? "Low" : "Medium";
+      capture.hfInput = input;
+      capture.hfDemo = input.demo;
     }
 
     if (Number.isFinite(capture.lfDb) && Number.isFinite(capture.hfDb)) {
       capture.svrDb = capture.hfDb - capture.lfDb;
     }
     capture.updatedAt = new Date().toISOString();
-    capture.demo = Boolean(state.audio.demo);
-    capture.trackLabel = state.audio.label;
-    capture.trackSampleRate = state.audio.sampleRate;
+    capture.demo = Boolean(capture.lfDemo || capture.hfDemo);
+    capture.trackLabel = input.label;
+    capture.trackSampleRate = input.sampleRate;
     state.captures[ear] = capture;
 
     state.busy = false;
@@ -560,6 +611,26 @@
         : "No spike on the last check. Check the selected microphone, then try again.";
   }
 
+  function inputConfirmed(capture) {
+    if (!capture?.lfInput || !capture?.hfInput) return false;
+    return looksLikeBluetooth(capture.lfInput.label) &&
+      looksLikeBluetooth(capture.hfInput.label) &&
+      !capture.lfInput.demo &&
+      !capture.hfInput.demo;
+  }
+
+  function inputMismatch(capture) {
+    if (!capture?.lfInput || !capture?.hfInput) return false;
+    return capture.lfInput.label !== capture.hfInput.label ||
+      Math.round(capture.lfInput.sampleRate) !== Math.round(capture.hfInput.sampleRate);
+  }
+
+  function crossEarInputMismatch(left, right) {
+    if (!left?.lfInput || !right?.lfInput) return false;
+    return left.lfInput.label !== right.lfInput.label ||
+      Math.round(left.lfInput.sampleRate) !== Math.round(right.lfInput.sampleRate);
+  }
+
   function renderReport() {
     const left = state.captures.left;
     const right = state.captures.right;
@@ -578,16 +649,32 @@
     const l = left.svrDb;
     const r = right.svrDb;
     const spread = Math.abs(l - r);
+    const phaseMismatch = inputMismatch(left) || inputMismatch(right);
+    const routeUnverified = !inputConfirmed(left) || !inputConfirmed(right);
+    const crossEarMismatch = crossEarInputMismatch(left, right);
+    const sideUnverified = !state.scratch.left?.verified || !state.scratch.right?.verified;
     const bandwidthMismatch = Boolean(left.bandwidth && right.bandwidth && left.bandwidth !== right.bandwidth);
     const narrow = left.bandwidth === "8 kHz / narrow" || right.bandwidth === "8 kHz / narrow";
     let category = "Inconclusive";
     let tone = "";
 
-    if (bandwidthMismatch) {
+    if (demo) {
+      category = "Demo only";
+      tone = "warn";
+    } else if (phaseMismatch || routeUnverified || crossEarMismatch || sideUnverified) {
+      category = "Unverified";
+      tone = "warn";
+    } else if (bandwidthMismatch) {
       category = "Inconclusive";
       tone = "warn";
-    } else if (l < THRESHOLDS.severe || r < THRESHOLDS.severe) {
-      category = `${l < r ? "Left" : "Right"} severely blocked`;
+    } else if (l < THRESHOLDS.severe && r < THRESHOLDS.severe) {
+      category = "Both severely blocked";
+      tone = "bad";
+    } else if (l < THRESHOLDS.severe) {
+      category = "Left severely blocked";
+      tone = "bad";
+    } else if (r < THRESHOLDS.severe) {
+      category = "Right severely blocked";
       tone = "bad";
     } else if (l < THRESHOLDS.bilateralMax && r < THRESHOLDS.bilateralMax && spread < THRESHOLDS.bilateralSpread) {
       category = "Both high-frequency loss";
@@ -604,19 +691,29 @@
     }
 
     const notes = [];
+    if (!demo) {
+      if (phaseMismatch) notes.push("The input changed between “Ahh” and “Ssss”; run this ear again.");
+      else if (routeUnverified) notes.push("The input was not confirmed as AirPods in both phases.");
+      if (crossEarMismatch) notes.push("Left and right used different inputs; run both ears again.");
+      if (sideUnverified) notes.push("The scratch check was not verified for both ears.");
+    }
     if (bandwidthMismatch) notes.push("Different input bandwidths; compare with caution.");
-    else if (narrow) notes.push("8 kHz narrowband; low confidence.");
+    else if (narrow && !demo) notes.push("8 kHz narrowband; low confidence.");
+
+    const prefix = demo ? "Demo signal. " : category === "Unverified" ? "Unverified. " : "";
     els.category.textContent = category;
     els.category.className = tone ? `status-${tone}` : "";
-    els.verdict.textContent = `${demo ? "Demo signal. " : ""}Left SVR ${l.toFixed(1)} dB · Right SVR ${r.toFixed(1)} dB · Difference ${spread.toFixed(1)} dB.${notes.length ? ` ${notes.join(" ")}` : ""}`;
+    els.verdict.textContent = `${prefix}Left SVR ${l.toFixed(1)} dB · Right SVR ${r.toFixed(1)} dB · Difference ${spread.toFixed(1)} dB.${notes.length ? ` ${notes.join(" ")}` : ""}`;
     updateButtons();
   }
 
   function updateButtons() {
     const disabled = state.busy;
-    els.scratch.disabled = disabled;
-    els.phaseLf.disabled = disabled;
-    els.phaseHf.disabled = disabled;
+    const noInput = !state.audio;
+    earButtons.forEach((button) => { button.disabled = disabled; });
+    els.scratch.disabled = disabled || noInput;
+    els.phaseLf.disabled = disabled || noInput;
+    els.phaseHf.disabled = disabled || noInput;
     els.reconnect.disabled = disabled;
     els.export.disabled = disabled || !hasAnyCapture();
     els.copy.disabled = disabled || !hasAnyCapture();
@@ -804,7 +901,7 @@
   }
 
   // Restore the last selected ear and badges after a reload.
-  document.querySelectorAll("[data-ear]").forEach((button) => {
+  earButtons.forEach((button) => {
     button.classList.toggle("selected", button.dataset.ear === state.activeEar);
   });
   els.earLabel.textContent = state.activeEar === "left" ? "Left" : "Right";

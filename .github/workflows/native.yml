@@ -17,6 +17,7 @@ permissions:
 jobs:
   build:
     runs-on: macos-15
+    timeout-minutes: 25
     steps:
       - name: Check out
         uses: actions/checkout@v4
@@ -35,15 +36,21 @@ jobs:
           echo "device=$DEVICE_ID" >> "$GITHUB_OUTPUT"
 
       - name: Run unit tests
+        timeout-minutes: 15
         run: |
           xcodebuild test \
             -project SonicCarePro.xcodeproj \
             -scheme SonicCarePro \
             -destination "platform=iOS Simulator,id=${{ steps.simulator.outputs.device }}" \
+            -parallel-testing-enabled NO \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 60 \
+            -maximum-test-execution-time-allowance 300 \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
 
       - name: Build unsigned device app
+        id: build
         run: |
           set +e
           xcodebuild \
@@ -62,7 +69,7 @@ jobs:
           exit "$status"
 
       - name: Publish failure log
-        if: failure()
+        if: failure() && steps.build.outcome == 'failure'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: native-log

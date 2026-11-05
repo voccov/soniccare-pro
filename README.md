@@ -6,7 +6,7 @@ next step: clean and retest, or seek service. English first; Swedish later. The 
 claims a measurement it did not make.
 
 Status: **Phase 0A — PWA live; Phase 0B native self-test built.** Plan revision
-`0.1.0-dev.3`. The PWA is in `web/` and live. The native self-test IPA is built and
+`0.1.0-dev.4`. The PWA is in `web/` and live. The native self-test IPA is built and
 waiting for a SideStore install on the iPhone.
 
 ## Route
@@ -35,7 +35,8 @@ app. It is the Phase 0A PWA: no SideStore, no expiry. The native app is Phase 0B
 - Install page: **https://voccov.github.io/soniccare-pro/install.html**
 - IPA: **https://github.com/voccov/soniccare-pro/releases/download/native-latest/SonicCarePro.ipa**
 - Phase 0B checks the native chain: microphone permission, AirPods HFP route, sample rate,
-  live RMS, 1 kHz tone, haptics, looping PiP guide. It is not the final five-step UI.
+  live RMS, 1 kHz tone, haptics, looping PiP guide. It is not the final five-step UI. This
+  proof build has no app icon and uses hardcoded English strings.
 
 ## Docs
 
@@ -53,8 +54,8 @@ app. It is the Phase 0A PWA: no SideStore, no expiry. The native app is Phase 0B
 
 ## How to run it
 
-The PWA is in `web/`. Phase 0B adds `project.yml`, the XcodeGen project and the GitHub
-Actions workflow. The native app is installed through SideStore, not a local dev server.
+The PWA is in `web/`. The native app is generated from `project.yml` by XcodeGen and built
+by the GitHub Actions workflow. Install it through SideStore, not a local dev server.
 
 ## Facts
 

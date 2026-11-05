@@ -8,7 +8,7 @@ final class AudioSessionModel: ObservableObject {
     @Published var routePort: String = "—"
     @Published var routeName: String = "—"
     @Published var sampleRate: String = "—"
-    @Published var rmsDb: Double = -90
+    @Published var rmsDb: Double = AudioMath.silenceFloorDb
     @Published var isRunning: Bool = false
     @Published var status: String = "Idle"
     @Published var errorText: String?
@@ -20,6 +20,17 @@ final class AudioSessionModel: ObservableObject {
     private var routeObserver: NSObjectProtocol?
 
     init() {
+        switch AVAudioApplication.shared.recordPermission {
+        case .granted:
+            permission = "Granted"
+        case .denied:
+            permission = "Denied"
+        case .undetermined:
+            permission = "Not requested"
+        @unknown default:
+            permission = "Unknown"
+        }
+
         routeObserver = NotificationCenter.default.addObserver(
             forName: AVAudioSession.routeChangeNotification,
             object: AVAudioSession.sharedInstance(),
@@ -39,17 +50,28 @@ final class AudioSessionModel: ObservableObject {
     }
 
     func requestPermission() {
-        let session = AVAudioSession.sharedInstance()
-        session.requestRecordPermission { [weak self] granted in
-            Task { @MainActor in
-                guard let self else { return }
-                self.permission = granted ? "Granted" : "Denied"
-                if granted {
-                    self.start()
-                } else {
-                    self.status = "Microphone denied"
+        switch AVAudioApplication.shared.recordPermission {
+        case .granted:
+            permission = "Granted"
+            start()
+        case .denied:
+            permission = "Denied"
+            status = "Microphone denied"
+        case .undetermined:
+            AVAudioApplication.requestRecordPermission { [weak self] granted in
+                Task { @MainActor in
+                    guard let self else { return }
+                    self.permission = granted ? "Granted" : "Denied"
+                    if granted {
+                        self.start()
+                    } else {
+                        self.status = "Microphone denied"
+                    }
                 }
             }
+        @unknown default:
+            permission = "Unknown"
+            status = "Microphone permission unknown"
         }
     }
 
@@ -58,10 +80,15 @@ final class AudioSessionModel: ObservableObject {
 
         do {
             let session = AVAudioSession.sharedInstance()
+            var options: AVAudioSession.CategoryOptions = [.allowBluetoothA2DP]
             #if compiler(>=6.2)
-            let options: AVAudioSession.CategoryOptions = [.allowBluetoothHFP, .allowBluetoothA2DP]
+            if #available(iOS 26.0, *) {
+                options.insert(.allowBluetoothHFP)
+            } else {
+                options.insert(.allowBluetooth)
+            }
             #else
-            let options: AVAudioSession.CategoryOptions = [.allowBluetooth, .allowBluetoothA2DP]
+            options.insert(.allowBluetooth)
             #endif
 
             do {
@@ -71,16 +98,15 @@ final class AudioSessionModel: ObservableObject {
             }
             try session.setActive(true)
 
-            let format = engine.inputNode.inputFormat(forBus: 0)
-            if format.sampleRate > 0, !tapInstalled {
-                installTap()
-            }
-
             if !toneConfigured {
                 engine.attach(player)
                 let toneFormat = AVAudioFormat(standardFormatWithSampleRate: 48_000, channels: 1)!
                 engine.connect(player, to: engine.mainMixerNode, format: toneFormat)
                 toneConfigured = true
+            }
+
+            if !tapInstalled, let format = installTap() {
+                sampleRate = AudioMath.sampleRateLabel(format.sampleRate)
             }
 
             engine.prepare()
@@ -106,7 +132,15 @@ final class AudioSessionModel: ObservableObject {
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         isRunning = false
         status = "Stopped"
-        rmsDb = -90
+        rmsDb = AudioMath.silenceFloorDb
+        sampleRate = "—"
+    }
+
+    /// PiP needs a playback session; stop the microphone first so the two sessions do not
+    /// fight. The next measurement starts with Enable microphone.
+    func pauseForPictureInPicture() {
+        stop()
+        status = "Paused for PiP"
     }
 
     func playTone() {
@@ -137,31 +171,56 @@ final class AudioSessionModel: ObservableObject {
         status = "Haptic tap"
     }
 
-    private func installTap() {
+    @discardableResult
+    private func installTap() -> AVAudioFormat? {
+        guard !tapInstalled else { return nil }
         let input = engine.inputNode
         let format = input.inputFormat(forBus: 0)
-        guard format.sampleRate > 0, !tapInstalled else { return }
+        guard format.sampleRate > 0 else { return nil }
+
         input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
-            let value = Self.rms(buffer)
+            var sum: Float = 0
+            if let data = buffer.floatChannelData?[0] {
+                for index in 0..<Int(buffer.frameLength) {
+                    let value = data[index]
+                    sum += value * value
+                }
+            }
+            let value = AudioMath.rmsDb(
+                sumOfSquares: sum,
+                count: Int(buffer.frameLength)
+            )
             Task { @MainActor in
                 self?.rmsDb = value
             }
         }
         tapInstalled = true
+        return format
     }
 
     private func routeChanged() {
         refreshRoute()
         guard isRunning else { return }
 
+        let session = AVAudioSession.sharedInstance()
+        guard session.currentRoute.inputs.first != nil else {
+            stop()
+            status = "No input"
+            return
+        }
+
         if tapInstalled {
             engine.inputNode.removeTap(onBus: 0)
             tapInstalled = false
         }
+        player.stop()
         engine.stop()
 
         do {
-            installTap()
+            try session.setActive(true)
+            if let format = installTap() {
+                sampleRate = AudioMath.sampleRateLabel(format.sampleRate)
+            }
             engine.prepare()
             try engine.start()
             status = "Route changed; input restarted"
@@ -183,21 +242,8 @@ final class AudioSessionModel: ObservableObject {
             routeName = "—"
         }
 
-        let rate = engine.inputNode.inputFormat(forBus: 0).sampleRate
-        sampleRate = rate > 0 ? String(format: "%.0f Hz", rate) : "—"
-    }
-
-    private static func rms(_ buffer: AVAudioPCMBuffer) -> Double {
-        guard let data = buffer.floatChannelData?[0] else { return -90 }
-        let count = Int(buffer.frameLength)
-        guard count > 0 else { return -90 }
-
-        var sum: Float = 0
-        for index in 0..<count {
-            let value = data[index]
-            sum += value * value
+        if !isRunning {
+            sampleRate = "—"
         }
-        let rms = sqrt(sum / Float(count))
-        return 20.0 * log10(max(Double(rms), 1e-7))
     }
 }

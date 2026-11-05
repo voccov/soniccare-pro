@@ -220,6 +220,7 @@ h2 {
   width: 100%;
   border-radius: var(--radius-small);
   padding: 0 18px;
+  font-size: 19px;
   font-weight: 650;
   letter-spacing: -0.01em;
 }

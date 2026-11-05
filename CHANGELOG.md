@@ -5,6 +5,33 @@ semver.
 
 ## [Unreleased]
 
+## [0.1.0-dev.4] — 2026-11-05
+
+### Changed
+
+- Native self-test uses Dynamic Type text styles, a shared `Theme`, and adaptive button /
+  PiP rows so large text does not clip.
+- Native unit tests now cover `AudioMath` RMS, level mapping, Bluetooth port detection and
+  sample-rate labels; CI runs them with a timeout.
+- The PWA report requires a confirmed AirPods input and a verified scratch check before it
+  shows a diagnostic category; otherwise it shows `Unverified`.
+- The PWA records the input label and sample rate for each phase and flags a changed input.
+- Demo mode uses a 220 Hz + 4.5 kHz two-tone signal and reports `Demo only`.
+
+### Fixed
+
+- PWA: changing ears during a capture no longer files the result under the wrong ear.
+- PWA: an iPhone-microphone capture can no longer produce `Left/Right high-frequency loss`.
+- PWA: a tie in the severe category no longer arbitrarily says `Right`.
+- Native: starting PiP no longer leaves the microphone engine running under a playback
+  session; the mic pauses and the UI says so.
+- Native: a route change reactivates the audio session and reports the real input sample
+  rate from the tap.
+- Native: the iOS 26 `.allowBluetoothHFP` path is availability-guarded; iOS 17 uses
+  `AVAudioApplication` for permission.
+- CI: the test step has timeouts, and the failure-log release step only runs when the build
+  step actually produced a log.
+
 ## [0.1.0-dev.3] — 2026-11-05
 
 ### Added

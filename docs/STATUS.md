@@ -1,17 +1,18 @@
 # Status — SonicCare Pro
 
-**Version:** `0.1.0-dev.3`  
-**Phase:** 0A — PWA live; 0B native self-test built; install pending  
+**Version:** `0.1.0-dev.4`  
+**Phase:** 0A — PWA live; 0B native self-test built and audited; install pending  
 **Last updated:** 2026-11-05  
 **State:** PWA is live and working on the owner's AirPods. Native Phase 0B is built: an
 unsigned IPA on GitHub and an install page are ready. The self-test has not run on the
-iPhone yet. The left-ear diagnosis still needs one controlled repeat.
+iPhone yet. The left-ear diagnosis still needs one controlled repeat. The audit fixed the
+PWA's unverified-report path and the native PiP/route-change conflicts.
 
 ## Done
 
 - Product, design, UX, copy, setup and decision records.
 - Two independent reviews answered in `docs/REVIEW_RESPONSE.md`.
-- Plan revision `0.1.0-dev.3` pushed to `voccov/soniccare-pro`.
+- Plan revision `0.1.0-dev.4` pushed to `voccov/soniccare-pro`.
 - Deploy key authorized; remote pushed; tags `v0.1.0-dev`, `.2`, `.3`, `.3-pwa`,
   `.3-pwa2`.
 - GitHub Pages source set to GitHub Actions; workflow write permission set.
@@ -36,9 +37,18 @@ iPhone yet. The left-ear diagnosis still needs one controlled repeat.
   - XcodeGen + SwiftUI shell, one app target, one test target;
   - microphone permission, HFP route, sample rate, live RMS;
   - 1 kHz tone, haptic tap, looping `PiPGuide.mp4` with PiP;
-  - unsigned arm64 IPA, iOS 17+, 102 KB;
-  - GitHub Actions native build successful; release tag `native-latest`;
+  - input restarts on a route change; PiP pauses the mic instead of fighting it;
+  - unsigned arm64 IPA, iOS 17+, 103 KB;
+  - GitHub Actions native build and unit tests successful; release tag `native-latest`;
   - install page at <https://voccov.github.io/soniccare-pro/install.html>.
+- Audit fixes:
+  - native `AudioMath` tests for RMS, level mapping, Bluetooth port and sample-rate label;
+  - iOS 17 permission API, iOS 26 HFP availability guard, real input sample rate;
+  - PWA refuses a category when the scratch check or AirPods input is unverified;
+  - PWA locks the ear selector during a capture and flags phase/ear input changes;
+  - demo mode uses two tones and reports `Demo only`, never a false ear diagnosis;
+  - headless Chromium PWA run with a synthetic two-tone microphone passed:
+    scratch verified, both ears captured, JSON copied, report restored after reload.
 
 ## Next actions
 
@@ -56,13 +66,25 @@ iPhone yet. The left-ear diagnosis still needs one controlled repeat.
 - Native self-test results.
 - Another controlled PWA pair for repeatability.
 
+## Known gaps
+
+- Native self-test still has no app icon and uses hardcoded English strings; the final UI
+  must move them to `Localizable.xcstrings`.
+- No Simulator screenshots or `performAccessibilityAudit` run yet; Dynamic Type styles are
+  in place, but the visual proof is still pending.
+- The native five-step diagnostic flow, SVR engine and scratch detection are Phase 1.
+- The PWA has no service worker/offline cache, PiP or haptics; those are documented
+  native/PWA limits.
+
 ## Latest evidence
 
 - Repo: <https://github.com/voccov/soniccare-pro>
 - PWA: <https://voccov.github.io/soniccare-pro/>
 - Data: left −8.1 dB SVR, right −0.95 dB SVR; left suspect; both mics live.
 - Scratch: left +37.0 dB delta / +18.2 dB ratio; right +28.3 dB delta / +10.4 dB ratio.
-- Plan/version checks pass for `0.1.0-dev.3`.
+- Plan/version checks pass for `0.1.0-dev.4`.
+- Native CI: unit tests on the Simulator plus an unsigned device IPA; a timeout guards the
+  test step.
 
 ## Do not forget
 

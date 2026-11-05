@@ -29,7 +29,7 @@ expiry warning, and a PWA fallback. The server never holds Apple credentials.
 
 ## ADR-003 — GitHub public repo + Actions + Pages
 
-**Status:** pending owner confirmation, 2026-11-05.
+**Status:** accepted and live, 2026-11-05.
 
 A public repo makes the free build and hosting path simple: GitHub Actions macOS builds
 the IPA, a release hosts it, and Pages hosts the SideStore source and the PWA. No server

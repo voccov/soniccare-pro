@@ -5,15 +5,17 @@ import SwiftUI
 import UIKit
 
 @MainActor
-final class PiPModel: ObservableObject {
+final class PiPModel: NSObject, ObservableObject, AVPictureInPictureControllerDelegate {
     @Published var status: String = "PiP ready"
 
     private let player = AVQueuePlayer()
     private var looper: AVPlayerLooper?
     private var controller: AVPictureInPictureController?
+    private weak var attachedLayer: AVPlayerLayer?
     private var configured = false
 
-    init() {
+    override init() {
+        super.init()
         guard let url = Bundle.main.url(forResource: "PiPGuide", withExtension: "mp4") else {
             status = "PiP video missing"
             return
@@ -27,10 +29,14 @@ final class PiPModel: ObservableObject {
     func attach(layer: AVPlayerLayer) {
         guard configured else { return }
         layer.player = player
-        if controller == nil {
-            controller = AVPictureInPictureController(playerLayer: layer)
-            controller?.canStartPictureInPictureAutomaticallyFromInline = true
-            controller?.requiresLinearPlayback = false
+        if controller == nil || attachedLayer !== layer {
+            attachedLayer = layer
+            let source = AVPictureInPictureController.ContentSource(playerLayer: layer)
+            let pip = AVPictureInPictureController(contentSource: source)
+            pip.delegate = self
+            pip.canStartPictureInPictureAutomaticallyFromInline = true
+            pip.requiresLinearPlayback = false
+            controller = pip
         }
         player.play()
     }
@@ -53,8 +59,21 @@ final class PiPModel: ObservableObject {
         if player.timeControlStatus != .playing {
             player.play()
         }
+        status = "Starting PiP…"
         controller.startPictureInPicture()
-        status = "PiP requested"
+    }
+
+    func pictureInPictureController(
+        _ controller: AVPictureInPictureController,
+        failedToStartPictureInPictureWithError error: Error
+    ) {
+        status = "PiP failed: \(error.localizedDescription)"
+    }
+
+    func pictureInPictureControllerDidStopPictureInPicture(
+        _ controller: AVPictureInPictureController
+    ) {
+        status = "PiP closed. Tap Enable microphone to resume the test."
     }
 }
 

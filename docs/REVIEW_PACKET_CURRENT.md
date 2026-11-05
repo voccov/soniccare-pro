@@ -1,5 +1,9 @@
 # SonicCare Pro — current app, solution, and plan for independent review
 
+> **Historical review packet (2026-11-05).** The PWA now has the cleaning guide and real
+> AirPods data; the native Phase 0B self-test is built and in CI. See `docs/STATUS.md` for
+> the current state. Keep the plan sections below as the review-time snapshot.
+
 **Reviewer:** you are a principal iOS engineer and product designer. Be blunt and
 specific. Do not rewrite the plan. Prioritize what matters, answer the questions at the
 end, and name the top three risks.

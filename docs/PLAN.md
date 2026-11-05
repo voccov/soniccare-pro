@@ -1,7 +1,8 @@
 # SonicCare Pro — build plan
 
-Status: **Phase 0A/0B — proof.** Plan revision `0.1.0-dev.3`, after two independent reviews.
-No app code yet. Last updated: 2026-11-05.
+Status: **Phase 0A/0B — proof.** Plan revision `0.1.0-dev.4`, after two independent reviews.
+The PWA is live; the native Phase 0B self-test is built, tested in CI and waiting for a
+SideStore install. Last updated: 2026-11-05.
 
 Review disposition: `docs/REVIEW_RESPONSE.md`. Full review packet:
 `docs/PLAN_FOR_REVIEW.md`.
@@ -64,16 +65,16 @@ the iPhone mic; exports JSON; no network calls; no persisted audio.
 
 ## Phase 0B — Native proof (`v0.1.0`)
 
-- [ ] Create the public GitHub repo and connect the deploy key.
+- [x] Create the public GitHub repo and connect the deploy key.
 - [ ] Complete the one-time SideStore setup; confirm the iPhone iOS version.
 - [x] Product, design, UX, copy, setup, review response and decision records.
 - [x] Scaffold `project.yml` (XcodeGen), one app target, one test target, theme and app
       shell.
 - [x] Spike: microphone permission, route display, tone, RMS, `PiPGuide.mp4` PiP,
       haptics, self-test.
-- [x] GitHub Actions: `xcodegen`, unsigned IPA build with `-derivedDataPath build` and
-      `-destination 'generic/platform=iOS'`; release `native-latest`. The test target is
-      present; CI test execution is deferred.
+- [x] GitHub Actions: `xcodegen`, `xcodebuild test` on the Simulator, unsigned IPA build
+      with `-derivedDataPath build` and `-destination 'generic/platform=iOS'`; release
+      `native-latest`. Unit tests run in CI with a timeout.
 - [ ] Install through SideStore; run the self-test on the iPhone.
 - [ ] Design proof: connection, measurement and report screens with real tokens.
 - [ ] Capture Simulator screenshots (dark, large Dynamic Type, small and large iPhone).
@@ -151,18 +152,20 @@ High-value automation first:
 
 ## Versioning
 
-- Semver in `VERSION`; currently `0.1.0-dev.3`. The app version mirrors it when built.
+- Semver in `VERSION`; currently `0.1.0-dev.4`. The app displays `0.1.0` because
+  `CFBundleShortVersionString` cannot carry a SemVer pre-release suffix; the build number
+  tracks the iteration.
 - `CHANGELOG.md` and `docs/STATUS.md` update at every phase.
 - Conventional Commits; tags `v0.1.0`, `v0.2.0`, `v0.3.0`, `v1.0.0`.
 - The local project is its own git repo; the GitHub repo is the public mirror.
 - The OpenChamber knowledge plan shows the checklist and current blockers.
 
-## Open decisions
+## Decisions and remaining unknowns
 
-- Build the Phase 0A PWA validation track? It is the hard gate for the native MVP.
-- Public GitHub repo (recommended) or private + server-hosted IPA.
-- iPhone iOS version and SideStore compatibility.
-- One-time PC + USB availability for SideStore.
+- Phase 0A PWA validation track: done; it is the hard gate for the native MVP.
+- Public GitHub repo: done; no secrets or personal data.
+- iPhone: iOS 26.7.2 confirmed.
+- SideStore: one-time Linux + USB install pending; Linux distribution still unknown.
 - Owner-only or shareable later. Assumed owner-first.
 
 ## Links
