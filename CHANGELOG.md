@@ -7,6 +7,12 @@ semver.
 
 ## [0.1.0-dev.3] — 2026-11-05
 
+### Added
+
+- Phase 0A PWA validation app in `web/`: on-device microphone capture, cross-phase SVR,
+  scratch check, demo mode, localStorage, JSON export, installable manifest.
+- GitHub Pages deployment workflow.
+
 ### Fixed
 
 - Scratch verification is explicitly **single-channel**: HFP streams only the active

@@ -5,9 +5,9 @@ shows whether one or both sides are muffled in the high frequencies, and gives o
 next step: clean and retest, or seek service. English first; Swedish later. The app never
 claims a measurement it did not make.
 
-Status: **Phase 0A/0B — proof. No app code yet.** Plan revision `0.1.0-dev.3`. The product,
-design, UX, copy, review response and phase plan are in place; the next steps are the PWA
-validation, the GitHub repo, and the one-time SideStore setup.
+Status: **Phase 0A — PWA built; native proof next.** Plan revision `0.1.0-dev.3`. The
+product, design, UX, copy, review response and phase plan are in place. The PWA is in
+`web/`; native app code has not started.
 
 ## Route
 
@@ -39,9 +39,8 @@ validation, the GitHub repo, and the one-time SideStore setup.
 
 ## How to run it
 
-Not built yet. Phase 0A adds the `web/` PWA; Phase 0B adds `project.yml`, the XcodeGen
-project and the GitHub Actions workflow. The native app is installed through SideStore, not
-a local dev server.
+The PWA is in `web/`. Phase 0B adds `project.yml`, the XcodeGen project and the GitHub
+Actions workflow. The native app is installed through SideStore, not a local dev server.
 
 ## Facts
 

@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#070709">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SonicCare">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="description" content="A private, on-device AirPods Pro microphone check. No uploads, no account.">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icon-180.png">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <title>SonicCare — AirPods microphone check</title>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="led" id="led" aria-hidden="true"></span>
+      <span class="wordmark">SonicCare</span>
+      <span class="version" id="version">0.1.0-dev.3</span>
+    </div>
+    <div class="status" id="status-pill">
+      <span class="dot" aria-hidden="true"></span>
+      <span id="status-text">Not connected</span>
+    </div>
+  </header>
+
+  <main>
+    <section id="intro" class="stack">
+      <div class="hero card">
+        <div class="hero-art" aria-hidden="true">
+          <svg viewBox="0 0 220 180" role="img" aria-label="Stylised AirPods Pro">
+            <defs>
+              <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#2a2b33"/>
+                <stop offset="1" stop-color="#111217"/>
+              </linearGradient>
+            </defs>
+            <ellipse cx="110" cy="160" rx="70" ry="8" fill="#000" opacity=".35"/>
+            <g transform="rotate(-10 78 88)">
+              <rect x="56" y="34" width="44" height="54" rx="20" fill="url(#body)" stroke="#ffffff" stroke-opacity=".14"/>
+              <rect x="72" y="82" width="13" height="62" rx="6.5" fill="#1b1c22" stroke="#ffffff" stroke-opacity=".12"/>
+              <circle cx="78" cy="56" r="9" fill="#0A84FF" opacity=".9"/>
+            </g>
+            <g transform="rotate(10 142 88)">
+              <rect x="120" y="34" width="44" height="54" rx="20" fill="url(#body)" stroke="#ffffff" stroke-opacity=".14"/>
+              <rect x="135" y="82" width="13" height="62" rx="6.5" fill="#1b1c22" stroke="#ffffff" stroke-opacity=".12"/>
+              <circle cx="142" cy="56" r="9" fill="#ffffff" opacity=".14"/>
+            </g>
+          </svg>
+        </div>
+        <div>
+          <p class="micro">AirPods Pro · microphone check</p>
+          <h1>Check your AirPods.</h1>
+          <p class="muted">A two-minute check for muffled or uneven sound. We test each earbud and show what we measured.</p>
+        </div>
+      </div>
+
+      <button id="enable" class="primary" type="button">Enable microphone</button>
+      <button id="demo" class="secondary" type="button">Try demo signal</button>
+      <p class="fine">Audio is processed on this phone. No uploads, no account, no recordings. Demo mode uses a synthetic tone and is labelled.</p>
+      <p id="intro-error" class="error hidden" role="alert"></p>
+
+      <div class="card quiet">
+        <p class="micro">What this is</p>
+        <p class="muted">A relative check, not a lab test. It compares the left and right microphones and looks for high-frequency loss. Bluetooth speech audio is limited, so a result is a signal, not a diagnosis.</p>
+      </div>
+    </section>
+
+    <section id="session" class="stack hidden" aria-live="polite">
+      <div class="card status-card">
+        <div class="status-row">
+          <div>
+            <p class="micro">Input</p>
+            <p class="input-label" id="input-label">Waiting for microphone</p>
+          </div>
+          <div class="status-right">
+            <span class="badge" id="route-badge">Unknown</span>
+            <span class="micro" id="sample-rate">— Hz</span>
+          </div>
+        </div>
+        <p class="fine" id="route-note">If this is not your AirPods, open Settings → Bluetooth → (i) → Microphone, or check the audio route in Control Center.</p>
+        <button id="reconnect" class="secondary" type="button">Reconnect input</button>
+      </div>
+
+      <div class="card">
+        <div class="step-head">
+          <div>
+            <p class="micro">Step 1</p>
+            <h2>Set the microphone</h2>
+          </div>
+          <span class="badge" id="scratch-badge">Unverified</span>
+        </div>
+        <p class="muted">Open <strong>Settings → Bluetooth → (i) → Microphone → Always Left</strong>. Then scratch the bottom silver ring of the left stem with a fingernail for one second.</p>
+        <div class="segmented" role="group" aria-label="Which earbud are you testing?">
+          <button type="button" data-ear="left" class="selected">Left</button>
+          <button type="button" data-ear="right">Right</button>
+        </div>
+        <button id="scratch" class="secondary" type="button">Start scratch check</button>
+        <div class="meter" aria-hidden="true"><div id="scratch-meter"></div></div>
+        <p class="fine" id="scratch-result">Not checked yet. No spike means the other microphone is still active.</p>
+      </div>
+
+      <div class="card">
+        <div class="step-head">
+          <div>
+            <p class="micro">Step 2 · <span id="ear-label">Left</span></p>
+            <h2>Voice test</h2>
+          </div>
+          <span class="badge" id="phase-badge">Ready</span>
+        </div>
+        <p class="muted">Say a steady <strong>“Ahh”</strong> for three seconds, then a steady <strong>“Ssss”</strong> for three seconds. Keep the phone still.</p>
+        <div class="readout">
+          <span id="live-db">—</span><span class="unit">dBFS</span>
+        </div>
+        <canvas id="spectrum" width="640" height="180" aria-label="Live spectrum"></canvas>
+        <p class="micro band-label" id="band-label">High band: 3–6.5 kHz</p>
+        <div class="actions">
+          <button id="phase-lf" class="primary" type="button">Start “Ahh”</button>
+          <button id="phase-hf" class="secondary" type="button">Start “Ssss”</button>
+        </div>
+        <p class="fine" id="test-status" aria-live="polite">Ready.</p>
+      </div>
+
+      <div class="card" id="report-card">
+        <div class="step-head">
+          <div>
+            <p class="micro">Result</p>
+            <h2 id="category">Not enough data</h2>
+          </div>
+          <span class="badge provisional">Provisional</span>
+        </div>
+        <div class="grid2">
+          <div>
+            <p class="micro">Left SVR</p>
+            <div class="metric" id="left-svr">—</div>
+          </div>
+          <div>
+            <p class="micro">Right SVR</p>
+            <div class="metric" id="right-svr">—</div>
+          </div>
+        </div>
+        <p class="muted" id="verdict">Complete both ears to compare.</p>
+        <p class="fine">SVR is a relative measure. A low value is a reason to inspect and clean the mesh, not a diagnosis.</p>
+        <div class="actions">
+          <button id="export" class="secondary" type="button">Export JSON</button>
+          <button id="reset" class="secondary" type="button">Reset</button>
+        </div>
+      </div>
+
+      <div class="card quiet">
+        <p class="micro">How to switch ears</p>
+        <p class="muted">Go back to iOS Settings, choose the other microphone, then return here and tap <strong>Reconnect input</strong>. The app cannot switch it for you.</p>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>Private by design. Audio never leaves this phone.</span>
+      <span id="footer-version">0.1.0-dev.3</span>
+    </footer>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>

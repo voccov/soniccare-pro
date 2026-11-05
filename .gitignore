@@ -21,3 +21,6 @@ logs/
 
 # OS noise
 .DS_Store
+
+# Local OpenChamber artifacts
+.openchamber/
