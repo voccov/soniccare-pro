@@ -23,6 +23,13 @@ product, design, UX, copy, review response and phase plan are in place. The PWA 
 - **No server port.** The app runs on the iPhone; build artifacts live under
   `/srv/data/airpods-doctor/` if a local host is needed.
 
+## Live validation build
+
+**https://voccov.github.io/soniccare-pro/**
+
+Open it in Safari on the iPhone, then **Share → Add to Home Screen** for a full-screen
+app. It is the Phase 0A PWA: no SideStore, no expiry. The native app is Phase 0B.
+
 ## Docs
 
 - [Product](PRODUCT.md) — users, purpose, constraints, principles.
