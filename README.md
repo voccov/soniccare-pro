@@ -5,7 +5,7 @@ shows whether one or both sides are muffled in the high frequencies, and gives o
 next step: clean and retest, or seek service. English first; Swedish later. The app never
 claims a measurement it did not make.
 
-Status: **Phase 0A/0B — proof. No app code yet.** Plan revision `0.1.0-dev.2`. The product,
+Status: **Phase 0A/0B — proof. No app code yet.** Plan revision `0.1.0-dev.3`. The product,
 design, UX, copy, review response and phase plan are in place; the next steps are the PWA
 validation, the GitHub repo, and the one-time SideStore setup.
 
@@ -18,7 +18,7 @@ validation, the GitHub repo, and the one-time SideStore setup.
 - **7-day refresh** with SideStore. Limits: 3 apps per device including SideStore, 10 App
   IDs per week. Baseline export/import is part of the app.
 - **PWA validation:** a small `web/` app on GitHub Pages tests the SVR method, gives a
-  no-expiry fallback, and collects real data before the native MVP.
+  no-expiry fallback, and is a hard gate for the native MVP.
 - **English first.** Swedish is a later localization.
 - **No server port.** The app runs on the iPhone; build artifacts live under
   `/srv/data/airpods-doctor/` if a local host is needed.

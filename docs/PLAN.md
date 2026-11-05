@@ -1,6 +1,6 @@
 # SonicCare Pro — build plan
 
-Status: **Phase 0A/0B — proof.** Plan revision `0.1.0-dev.2`, after independent review.
+Status: **Phase 0A/0B — proof.** Plan revision `0.1.0-dev.3`, after two independent reviews.
 No app code yet. Last updated: 2026-11-05.
 
 Review disposition: `docs/REVIEW_RESPONSE.md`. Full review packet:
@@ -21,22 +21,33 @@ step: clean and retest, or stop and seek service.
 - English first; Swedish later. No pseudo-localization in v1.
 - Dark-only v1; one electric-blue accent; Apple-calm structure with tactile instrument
   detail.
-- Manual Left/Right microphone switch in iOS Settings; the app guides and verifies with a
-  one-second **fingernail scratch** on the bottom stem ring.
-- Relative measurement only, with **per-ear SVR** and a **bilateral** category. HFP is a
-  speech link; no lab calibration, firmware, serial or battery claims.
+- Manual Left/Right microphone switch in iOS Settings. HFP sends one mono stream, so the
+  app verifies only the **target ear** with a one-second fingernail scratch: a transient
+  ≥18 dB above the noise floor confirms it; silence means the other mic is still active.
+  The app cannot compare both ears simultaneously.
+- Relative measurement only, with **per-ear SVR** and a **bilateral** category. `LF` is
+  the band-integrated power during Phase A (“Ahhh”, 150–800 Hz); `HF` is the integrated
+  power during Phase B (“Ssss”, 3–6.5 kHz); `SVR = HF − LF`. HFP can be 8, 16 or 24 kHz;
+  read the actual rate and set the band from Nyquist. No lab calibration, firmware,
+  serial or battery claims.
 - One linear flow with inline guidance and visible skips. No Guide me / Quick test mode
   toggle.
 - Categorical report plus measured dB delta. No 0–100 headline score.
-- No 165 Hz tone in the MVP. No Live Activity.
+- PiP uses a bundled looping MP4 with `AVQueuePlayer` + `AVPlayerLooper`; no Live Activity.
+- No 165 Hz tone in the MVP.
+- Phase 0A PWA is a hard gate for the native MVP; native remains the craft build.
 - Audio stays on the phone. No uploads, accounts or analytics.
 
-## Phase 0A — PWA validation (recommended, fast)
+## Phase 0A — PWA validation (hard gate, fast)
 
 A single-page `web/` app, plain HTML/CSS/JS, hosted on GitHub Pages. It uses `getUserMedia`
 with `echoCancellation: false`, `noiseSuppression: false`, `autoGainControl: false`, Web
-Audio FFT bands, the same SVR and bilateral logic, localStorage, and JSON export. No
-recordings, no uploads, no SideStore.
+Audio FFT bands, the same cross-phase SVR and bilateral logic, localStorage, and JSON
+export. No recordings, no uploads, no SideStore.
+
+It must show `audioTrack.getSettings().sampleRate` and `audioTrack.label`, and include the
+fingernail-scratch check. If scratching the AirPod stem does not spike the meter, Safari is
+on the iPhone microphone; the result is `Unverified`.
 
 Purpose:
 
@@ -44,9 +55,12 @@ Purpose:
 - Validate the SVR and bilateral method on the actual AirPods and voice.
 - Collect real band data to set the native thresholds.
 - Serve as a fallback if SideStore is painful or expires between uses.
+- Act as a **hard gate** for the native MVP: if the PWA solves the problem, native becomes
+  an optional craft build.
 
-Acceptance: works in Safari on the iPhone; measures both ears; shows categorical results;
-exports JSON; no network calls; no persisted audio.
+Acceptance: works in Safari on the iPhone; displays route label and sample rate; measures
+both ears; shows categorical results; the scratch check distinguishes the AirPods mic from
+the iPhone mic; exports JSON; no network calls; no persisted audio.
 
 ## Phase 0B — Native proof (`v0.1.0`)
 
@@ -57,8 +71,8 @@ exports JSON; no network calls; no persisted audio.
       shell.
 - [ ] Spike: microphone permission, route display, tone, RMS, `PiPGuide.mp4` PiP,
       haptics, self-test.
-- [ ] GitHub Actions: `xcodegen`, `xcodebuild test` on the Simulator, unsigned IPA build,
-      artifact/release.
+- [ ] GitHub Actions: `xcodegen`, `xcodebuild test` on the Simulator, unsigned IPA build
+      with `-derivedDataPath build -destination 'generic/platform=iOS'`, artifact/release.
 - [ ] Install through SideStore; run the self-test on the iPhone.
 - [ ] Design proof: connection, measurement and report screens with real tokens.
 - [ ] Capture Simulator screenshots (dark, large Dynamic Type, small and large iPhone).
@@ -72,8 +86,11 @@ supported.
 ## Phase 1 — Diagnostic MVP (`v0.2.0`)
 
 - [ ] Audio engine: `.playAndRecord` + `.measurement`, `.allowBluetoothHFP` with compiler
-      fallback, route monitor, input tap, FFT, band energies, per-ear SVR, adaptive
-      fingernail-scratch detection.
+      fallback, route monitor, input tap, FFT, band-integrated power, **cross-phase SVR**
+      (`HF` from “Ssss” minus `LF` from “Ahhh”), and single-channel target-ear scratch
+      detection.
+- [ ] Provisional categories: balanced, unilateral loss, bilateral loss, severely blocked;
+      thresholds are starting hypotheses and are calibrated from Phase 0A data.
 - [ ] Five-step flow: connection, side setup, voice test, report, recovery.
 - [ ] One flow with inline “Why” disclosures, visible skip, resume after backgrounding.
 - [ ] Report: categorical verdict, confidence, dB delta, spectral diff, “what we measured /
@@ -91,10 +108,11 @@ contrast checks pass.
 
 ## Phase 2 — Copilot and polish (`v0.3.0`)
 
-- [ ] PiP video guide with `AVPlayerLayer`; test auto-start and button fallback.
+- [ ] PiP video guide with `AVQueuePlayer` + `AVPlayerLooper`; test auto-start and button
+      fallback.
 - [ ] Settings checklist with manual path; no private URL promise.
 - [ ] Motion pass: step transitions, result reveal, level ring, success check.
-- [ ] Vector hero; four-zone anatomical diagram.
+- [ ] Vector hero; four-zone anatomical diagram from static SVG/PDF assets.
 - [ ] Haptics tuning; Reduce Motion variants.
 - [ ] Simulator screenshot review; final visual fixes.
 
@@ -118,11 +136,13 @@ reflect the release; no secrets, personal identifiers or audio committed.
 High-value automation first:
 
 - **GitHub Actions macOS:** `xcodegen`, `xcodebuild test` on the Simulator,
-  `xcodebuild` unsigned device build, IPA packaging, Simulator screenshots (dark, large
+  `xcodebuild` unsigned device build with `-derivedDataPath build` and
+  `-destination 'generic/platform=iOS'`, IPA packaging, Simulator screenshots (dark, large
   Dynamic Type, small and large iPhone), `performAccessibilityAudit`, artifact/release.
+  `project.yml` sets `GENERATE_INFOPLIST_FILE: NO` and an explicit `INFOPLIST_FILE`.
 - **PWA:** GitHub Pages deploy; no server.
 - **Keep:** `scripts/status.sh` and `scripts/check-docs.sh` (version, phase, next actions,
-  local-URL and personal-identifier checks).
+  local-URL and personal-identifier checks, including Tailscale CGNAT/IPv6 prefixes).
 - **Defer until the audio engine works:** copy/token/contrast lint scripts, screenshot
   automation beyond the basic captures, pseudo-localization.
 - **Bounded review:** one batch of screenshots and fixes per phase; at most one
@@ -130,7 +150,7 @@ High-value automation first:
 
 ## Versioning
 
-- Semver in `VERSION`; currently `0.1.0-dev.2`. The app version mirrors it when built.
+- Semver in `VERSION`; currently `0.1.0-dev.3`. The app version mirrors it when built.
 - `CHANGELOG.md` and `docs/STATUS.md` update at every phase.
 - Conventional Commits; tags `v0.1.0`, `v0.2.0`, `v0.3.0`, `v1.0.0`.
 - The local project is its own git repo; the GitHub repo is the public mirror.
@@ -138,7 +158,7 @@ High-value automation first:
 
 ## Open decisions
 
-- Build the Phase 0A PWA validation track? Recommended.
+- Build the Phase 0A PWA validation track? It is the hard gate for the native MVP.
 - Public GitHub repo (recommended) or private + server-hosted IPA.
 - iPhone iOS version and SideStore compatibility.
 - One-time PC + USB availability for SideStore.

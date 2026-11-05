@@ -14,7 +14,7 @@ firmware/serial/battery, or widen Bluetooth HFP.
 
 A modern PWA can do more than the first plan admitted: raw-ish `getUserMedia`, Web Audio
 FFT, and HTML5 video PiP. A PWA validation build is therefore part of the project, not a
-replacement.
+replacement. Phase 0A is a hard gate for the native MVP; native remains the craft build.
 
 ## ADR-002 — Free distribution: unsigned IPA + SideStore
 
@@ -69,14 +69,24 @@ report shows `Not tested` for skipped work and never fabricates data.
 **Status:** accepted, revised 2026-11-05.
 
 Bluetooth HFP is a speech link; absolute calibration is not possible. The app computes
-`SVR = HF (3–6.5 kHz) − LF (150–800 Hz)` per ear, compares left vs right, and checks each
-ear against a conservative range or baseline. It flags `Both high-frequency loss` when
-both ears have low SVR, even if they match each other.
+**cross-phase, band-integrated SVR** per ear:
+
+```
+LF_dB = 10 log10( Σ_{150}^{800}   |X_A(f)|² )   # Phase A, “Ahhh”
+HF_dB = 10 log10( Σ_{3000}^{6500} |X_B(f)|² )   # Phase B, “Ssss”
+SVR_dB = HF_dB - LF_dB
+```
+
+It compares left vs right and checks each ear against a conservative range or baseline.
+It flags `Both high-frequency loss` when both ears have low SVR, even if they match each
+other. Same FFT size, window and normalization for both phases; no mean-per-bin values.
 
 The input sample rate is read at runtime: 8 kHz uses 2–3.5 kHz with low confidence, 16/24
 kHz use 3–6.5 kHz, and the app never assumes a fixed ceiling.
 
-The report uses categories plus measured dB. No 0–100 headline score.
+The starting thresholds (healthy −6 to +4 dB, unilateral delta ≥6 dB, bilateral both
+< −10 dB, severe < −18 dB) are provisional. Phase 0A data sets the final values. The
+report uses categories plus measured dB. No 0–100 headline score.
 
 ## ADR-008 — Apple cleaning method; no 165 Hz or Live Activity in v1
 
@@ -98,6 +108,11 @@ On a macOS runner, Xcode is already available. XcodeGen generates a small projec
 `project.yml`; native `xcodebuild` builds it; the unsigned `.app` is packaged into an IPA.
 `xtool` is not used: it adds an unnecessary bridge for a machine that already has Xcode.
 
+The CI command uses `-derivedDataPath build -destination 'generic/platform=iOS'` and copies
+from `build/Build/Products/Release-iphoneos/`. `project.yml` sets
+`GENERATE_INFOPLIST_FILE: NO` and an explicit `INFOPLIST_FILE` so background modes and
+usage strings survive generation.
+
 The project is one app target + one test target. No three-module SwiftPM split; tests run
 on the Simulator with `@testable import`.
 
@@ -109,9 +124,10 @@ The personal build does not promise `App-Prefs:` navigation. It is private and u
 on modern iOS. The UI shows the manual Settings path and a bundled PiP video; a Control
 Center long-press tip may be shown but is not guaranteed.
 
-PiP uses a standard bundled MP4 + `AVPlayerLayer`, not a live `ImageRenderer`/sample-buffer
-generator. The App Store path remains a later, cleaned-up option behind a
-`PERSONAL_BUILD` flag.
+PiP uses a standard bundled MP4 with `AVQueuePlayer` + `AVPlayerLooper` and
+`requiresLinearPlayback = false`, not a live `ImageRenderer`/sample-buffer generator. The
+looper avoids the end-of-video PiP collapse. The App Store path remains a later,
+cleaned-up option behind a `PERSONAL_BUILD` flag.
 
 ## ADR-011 — Impeccable as the design authority
 

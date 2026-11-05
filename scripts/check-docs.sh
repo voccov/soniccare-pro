@@ -15,7 +15,7 @@ for file in README.md docs/SETUP.md docs/STATUS.md docs/PLAN.md docs/REVIEW_RESP
     printf 'Local URL found in %s\n' "$file" >&2
     fail=1
   fi
-  if grep -nE '([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})|ts\.net|(^|[^0-9])100\.[0-9]{1,3}\.|[0-9A-Fa-f]{40}' "$file" >/dev/null 2>&1; then
+  if grep -nE '([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})|ts\.net|fd7a:115c:a1e0:|(^|[^0-9])100\.[0-9]{1,3}\.|[0-9A-Fa-f]{40}' "$file" >/dev/null 2>&1; then
     printf 'Personal identifier found in %s\n' "$file" >&2
     fail=1
   fi

@@ -69,6 +69,8 @@ Also banned:
 - `I've set it to Left`
 - `Lightly scratch the bottom silver ring with a fingernail for one second.`
 - `Left microphone confirmed.`
+- `Nothing happened. iOS is still using the other microphone. Go back to Settings and
+  check the selected microphone.`
 
 **Voice test**
 - `Say "Ahh" for three seconds.`

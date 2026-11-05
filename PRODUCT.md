@@ -50,10 +50,15 @@ medical device.
 - Native iOS: `AVAudioSession` `.playAndRecord` + `.measurement`, `AVAudioEngine`,
   Accelerate/vDSP, CoreHaptics, Picture in Picture, background audio.
 - iOS cannot let a third-party app toggle the AirPods Left/Right microphone setting.
-  The user must change it in Settings; the app can guide and verify with a stem tap.
+  The user must change it in Settings; the app can guide and verify with a one-second
+  fingernail scratch on the target ear. HFP sends one mono stream, so the app verifies only
+  the target ear; silence means the other microphone is still active.
 - Bluetooth HFP is a speech link: narrowband or wideband, band-limited and processed.
-  Absolute calibration is not possible. Comparisons are relative. The app checks the
-  input sample rate and lowers confidence when the high band is unavailable.
+  Absolute calibration is not possible. Comparisons are relative. The app reads the actual
+  input sample rate (8, 16 or 24 kHz) and lowers confidence when the high band is
+  unavailable.
+- SVR is cross-phase and band-integrated: `LF` from Phase A (“Ahhh”, 150–800 Hz), `HF` from
+  Phase B (“Ssss”, 3–6.5 kHz). Per-ear thresholds are provisional until Phase 0A data.
 - Firmware, serial and battery are not available through public APIs. The app must not
   claim them.
 - Free sideload limits: 3 apps per device including SideStore, 10 App IDs per week,
@@ -65,6 +70,8 @@ medical device.
   toggle.
 - Per-ear SVR plus a bilateral `Both high-frequency loss` category; left/right similarity
   alone cannot rule out two equally muffled ears.
+- PiP uses a bundled looping MP4 with `AVQueuePlayer` + `AVPlayerLooper`.
+- Phase 0A PWA is a hard gate for the native MVP; native remains the craft build.
 - Categorical report plus measured dB delta. No 0–100 headline score.
 - No 165 Hz tone and no Live Activity in the MVP.
 - Dark-only v1 by design, with increased-contrast and Dynamic Type support.

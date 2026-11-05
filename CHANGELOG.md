@@ -5,6 +5,24 @@ semver.
 
 ## [Unreleased]
 
+## [0.1.0-dev.3] — 2026-11-05
+
+### Fixed
+
+- Scratch verification is explicitly **single-channel**: HFP streams only the active
+  microphone, so the app verifies the target ear and treats silence as “wrong mic active”.
+- SVR is **cross-phase and band-integrated**: `HF` from Phase B (“Ssss”) minus `LF` from
+  Phase A (“Ahhh”), not a within-phase mean-per-bin value.
+- `xcodebuild` now uses `-derivedDataPath build -destination 'generic/platform=iOS'`; the
+  IPA copy path is correct.
+- PiP uses `AVQueuePlayer` + `AVPlayerLooper` and `requiresLinearPlayback = false`, so the
+  looping guide does not collapse at the end of the video.
+- XcodeGen keeps an explicit `Info.plist` (`GENERATE_INFOPLIST_FILE: NO`).
+- PWA displays `sampleRate`/`label` and includes the scratch check; Phase 0A is a hard gate
+  for the native MVP.
+- Provisional SVR thresholds are recorded as hypotheses for Phase 0A calibration.
+- `check-docs.sh` scans Tailscale CGNAT/IPv6 prefixes as well as emails and device IDs.
+
 ## [0.1.0-dev.2] — 2026-11-05
 
 ### Changed

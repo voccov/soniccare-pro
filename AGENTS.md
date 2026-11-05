@@ -9,7 +9,7 @@ check, a plain-language report, and a safe cleaning guide. A small PWA validatio
 tests the acoustic method before the native build. English first; Swedish is a later
 locale. Owner-facing and mobile-first.
 
-Status: Phase 0A/0B — proof. Plan revision `0.1.0-dev.2`. Do not scaffold beyond the
+Status: Phase 0A/0B — proof. Plan revision `0.1.0-dev.3`. Do not scaffold beyond the
 Phase 0 spike until the go/no-go review passes.
 
 ## Settled decisions
@@ -19,18 +19,25 @@ Phase 0 spike until the go/no-go review passes.
 - Free distribution: unsigned IPA; SideStore signs and installs with a free Apple ID. No
   TestFlight and no paid developer account.
 - The app cannot toggle the AirPods Left/Right microphone setting. The user changes it in
-  Settings; the app guides and verifies with a one-second fingernail scratch.
+  Settings; the app verifies the **target ear** with a one-second fingernail scratch.
+  HFP sends one mono stream: a transient at least 18 dB above the noise floor means
+  `Verified`; silence means the other microphone is still active. Never claim a
+  simultaneous opposite-ear comparison.
 - Firmware, serial and battery are not available through public APIs. Never claim them.
-- Relative measurement only: per-ear SVR plus left/right, with a bilateral
-  `Both high-frequency loss` category. HFP can be 8, 16 or 24 kHz; read the actual sample
-  rate and set the band from Nyquist. Never present a heuristic as a lab result.
+- Relative measurement only: **cross-phase, band-integrated SVR**. `LF` comes from Phase A
+  (“Ahhh”, 150–800 Hz); `HF` comes from Phase B (“Ssss”, 3–6.5 kHz); `SVR = HF − LF`.
+  HFP can be 8, 16 or 24 kHz; read the actual sample rate and set the band from Nyquist.
+  Provisional thresholds are hypotheses until Phase 0A data exists. Never present a
+  heuristic as a lab result.
 - Categorical report plus measured dB. No 0–100 headline score.
 - One linear flow with inline guidance and visible skips. No Guide me / Quick test toggle.
 - English first. All user-facing strings go through `Localizable.xcstrings`.
 - Dark-only v1; one accent; tertiary text `#8E8E93`.
-- PiP uses a bundled looping MP4 and `AVPlayerLayer`; no Live Activity, no 165 Hz tone in
-  the MVP.
+- PiP uses a bundled looping MP4 with `AVQueuePlayer` + `AVPlayerLooper`; no Live Activity,
+  no 165 Hz tone in the MVP.
 - No private `App-Prefs:` promise. Show the manual Settings path and the PiP video.
+- Phase 0A PWA is a hard gate for the native MVP; native remains the craft build. The PWA
+  must show `sampleRate`/`label` and include the scratch check, or it is `Unverified`.
 
 ## Ways of working
 

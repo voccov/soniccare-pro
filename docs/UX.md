@@ -79,8 +79,10 @@ missing. The app never fills a gap with a guess.
 - On return: `Which microphone did you set?` segmented control.
 - `Test left microphone`: ask the user to **lightly scratch the bottom silver ring with a
   fingernail for one second**. Do not tap the stem; the force sensor can trigger a gesture.
-  Detect a broadband transient above an adaptive noise floor; the opposite ear should not
-  show the same spike. Success haptic; `Left microphone confirmed`.
+  HFP sends only the active mono stream, so this verifies the **target ear** only: a
+  transient at least 18 dB above the noise floor confirms it; silence means iOS is still
+  using the other microphone. No simultaneous opposite-ear claim. Success haptic; `Left
+  microphone confirmed` or `Nothing happened — check the selected microphone`.
 - `Skip side check` marks the comparison unverified; the report says so.
 
 ### Voice test
@@ -159,9 +161,12 @@ Design every one of these; no blank screens.
 
 ## PWA validation
 
-The Phase 0A PWA mirrors this flow without PiP, haptics or route verification. It is a
-validation tool and a no-expiry fallback, not a second product. Its data export informs
-the native bilateral thresholds.
+The Phase 0A PWA mirrors this flow without PiP, haptics or native route verification. It is
+a validation tool, a no-expiry fallback, and a **hard gate for the native MVP**. It must
+show `audioTrack.getSettings().sampleRate` and `audioTrack.label`, and include the
+fingernail-scratch check. If scratching the AirPod stem does not spike the meter, Safari is
+on the iPhone microphone; the result is `Unverified`. Its JSON export informs the native
+bilateral thresholds.
 
 ## Accessibility
 
