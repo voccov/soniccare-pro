@@ -15,6 +15,9 @@ semver.
   detection, automatic stream re-lock on return from Settings, a 4-zone cleaning guide,
   a 2-hour drying timer, and Copy JSON.
 - GitHub Pages deployment workflow.
+- Phase 0B native self-test: XcodeGen project, SwiftUI self-test shell, microphone
+  permission, HFP route, sample rate, live RMS, 1 kHz tone, haptics, looping PiP video,
+  unsigned IPA, GitHub Actions build, and install page.
 
 ### Fixed
 

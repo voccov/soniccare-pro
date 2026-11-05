@@ -5,9 +5,9 @@ shows whether one or both sides are muffled in the high frequencies, and gives o
 next step: clean and retest, or seek service. English first; Swedish later. The app never
 claims a measurement it did not make.
 
-Status: **Phase 0A — PWA built; native proof next.** Plan revision `0.1.0-dev.3`. The
-product, design, UX, copy, review response and phase plan are in place. The PWA is in
-`web/`; native app code has not started.
+Status: **Phase 0A — PWA live; Phase 0B native self-test built.** Plan revision
+`0.1.0-dev.3`. The PWA is in `web/` and live. The native self-test IPA is built and
+waiting for a SideStore install on the iPhone.
 
 ## Route
 
@@ -29,6 +29,13 @@ product, design, UX, copy, review response and phase plan are in place. The PWA 
 
 Open it in Safari on the iPhone, then **Share → Add to Home Screen** for a full-screen
 app. It is the Phase 0A PWA: no SideStore, no expiry. The native app is Phase 0B.
+
+## Native self-test build
+
+- Install page: **https://voccov.github.io/soniccare-pro/install.html**
+- IPA: **https://github.com/voccov/soniccare-pro/releases/download/native-latest/SonicCarePro.ipa**
+- Phase 0B checks the native chain: microphone permission, AirPods HFP route, sample rate,
+  live RMS, 1 kHz tone, haptics, looping PiP guide. It is not the final five-step UI.
 
 ## Docs
 

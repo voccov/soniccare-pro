@@ -22,9 +22,11 @@ end, and name the top three risks.
 - The PWA has been tested on the owner’s real AirPods. First full pair: left SVR −8.1 dB,
   right SVR −0.95 dB; left is 7.2 dB weaker; both scratch checks verified. One controlled
   repeat is still needed because the first left run was −13.5 dB.
-- The **native iOS app has not been built yet.** It is planned, not abandoned.
-- **SideStore has not been installed yet.** The one-time PC + USB setup is pending; the
-  owner’s PC OS is unknown.
+- The **native Phase 0B self-test has been built.** Unsigned arm64 IPA, iOS 17+, release
+  tag `native-latest`, and an install page are ready. It has not been installed on the
+  iPhone yet. It is the proof build, not the final five-step UI.
+- **SideStore has not been installed yet.** The one-time Linux + USB setup is pending; the
+  owner’s Linux distribution is unknown.
 - The PWA is the Phase 0A validation gate. It gives a working tool now, no expiry, and
   real data before the native build. The native app is Phase 0B and the craft product.
 

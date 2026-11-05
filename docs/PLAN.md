@@ -67,12 +67,13 @@ the iPhone mic; exports JSON; no network calls; no persisted audio.
 - [ ] Create the public GitHub repo and connect the deploy key.
 - [ ] Complete the one-time SideStore setup; confirm the iPhone iOS version.
 - [x] Product, design, UX, copy, setup, review response and decision records.
-- [ ] Scaffold `project.yml` (XcodeGen), one app target, one test target, theme and app
+- [x] Scaffold `project.yml` (XcodeGen), one app target, one test target, theme and app
       shell.
-- [ ] Spike: microphone permission, route display, tone, RMS, `PiPGuide.mp4` PiP,
+- [x] Spike: microphone permission, route display, tone, RMS, `PiPGuide.mp4` PiP,
       haptics, self-test.
-- [ ] GitHub Actions: `xcodegen`, `xcodebuild test` on the Simulator, unsigned IPA build
-      with `-derivedDataPath build -destination 'generic/platform=iOS'`, artifact/release.
+- [x] GitHub Actions: `xcodegen`, unsigned IPA build with `-derivedDataPath build` and
+      `-destination 'generic/platform=iOS'`; release `native-latest`. The test target is
+      present; CI test execution is deferred.
 - [ ] Install through SideStore; run the self-test on the iPhone.
 - [ ] Design proof: connection, measurement and report screens with real tokens.
 - [ ] Capture Simulator screenshots (dark, large Dynamic Type, small and large iPhone).

@@ -1,11 +1,11 @@
 # Status — SonicCare Pro
 
 **Version:** `0.1.0-dev.3`  
-**Phase:** 0A — PWA live; first real AirPods data in; native Phase 0B starting  
+**Phase:** 0A — PWA live; 0B native self-test built; install pending  
 **Last updated:** 2026-11-05  
-**State:** PWA is live and working on the owner's AirPods. First full pair received; the
-left ear is the weaker side, but one more controlled pair is needed for repeatability.
-Native app code has not started yet; Phase 0B is the next build.
+**State:** PWA is live and working on the owner's AirPods. Native Phase 0B is built: an
+unsigned IPA on GitHub and an install page are ready. The self-test has not run on the
+iPhone yet. The left-ear diagnosis still needs one controlled repeat.
 
 ## Done
 
@@ -32,21 +32,29 @@ Native app code has not started yet; Phase 0B is the next build.
   - wideband link, medium confidence; no 8 kHz cliff.
 - First left run was −13.5 dB; the left SVR moved 5.4 dB between runs. Repeatability is
   not settled.
+- Phase 0B native self-test built:
+  - XcodeGen + SwiftUI shell, one app target, one test target;
+  - microphone permission, HFP route, sample rate, live RMS;
+  - 1 kHz tone, haptic tap, looping `PiPGuide.mp4` with PiP;
+  - unsigned arm64 IPA, iOS 17+, 102 KB;
+  - GitHub Actions native build successful; release tag `native-latest`;
+  - install page at <https://voccov.github.io/soniccare-pro/install.html>.
 
 ## Next actions
 
-1. Run one more controlled left+right pair at the same volume and distance.
-2. If the left stays at least 6 dB weaker, clean the **left mesh only**, wait 2 hours, and
+1. Complete the one-time SideStore setup on the Linux PC.
+2. Install the native self-test from the install page.
+3. Run the native self-test: permission, HFP route, sample rate, live RMS, tone, haptics, PiP.
+4. Run one more controlled left+right PWA pair at the same volume and distance.
+5. If the left stays at least 6 dB weaker, clean the **left mesh only**, wait 2 hours, and
    retest.
-3. Send the PC OS for the one-time SideStore setup.
-4. Start native Phase 0B: XcodeGen shell, self-test, GitHub Actions IPA.
-5. Install via SideStore and compare native vs PWA.
-6. Set the final thresholds from repeated real data.
+6. Set the final thresholds and start the native MVP.
 
 ## Blockers
 
-- SideStore one-time PC + USB setup; PC OS still unknown.
-- Another controlled pair for repeatability before cleaning.
+- SideStore one-time Linux setup; Linux distribution still unknown.
+- Native self-test results.
+- Another controlled PWA pair for repeatability.
 
 ## Latest evidence
 
