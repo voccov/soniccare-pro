@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#070709">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="SonicCare">
+  <link rel="stylesheet" href="./styles.css">
+  <title>Install SonicCare Pro</title>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="led live" aria-hidden="true"></span><span class="wordmark">SonicCare</span><span class="version">native · 0.1.0</span></div>
+    <a class="status" href="./" style="text-decoration:none;color:var(--muted)">Back</a>
+  </header>
+
+  <main>
+    <section class="stack">
+      <div class="card">
+        <p class="micro">Native · Phase 0B self-test</p>
+        <h1>Install SonicCare Pro</h1>
+        <p class="muted">This is the native SwiftUI self-test build. It checks microphone permission, the AirPods HFP route, sample rate, live RMS, haptics, and the floating PiP guide.</p>
+
+        <a class="primary button-link" href="sidestore://install?url=https%3A%2F%2Fgithub.com%2Fvoccov%2Fsoniccare-pro%2Freleases%2Fdownload%2Fnative-latest%2FSonicCarePro.ipa">Install in SideStore</a>
+
+        <p class="fine">SideStore must already be installed, signed in, and refreshed. Open this page in Safari, not an in-app browser. The app is unsigned until SideStore signs it on your iPhone.</p>
+      </div>
+
+      <div class="card">
+        <p class="micro">Before you tap</p>
+        <p class="muted">1. SideStore is installed and refreshed.<br>2. LocalDevVPN is connected.<br>3. You are using the spare Apple ID.</p>
+        <p class="fine">If the button does nothing, SideStore is not installed yet. Finish the one-time SideStore setup first. If SideStore shows an error, send the exact text or a screenshot.</p>
+        <a class="secondary button-link" href="https://github.com/voccov/soniccare-pro/releases/download/native-latest/SonicCarePro.ipa">Download the IPA instead</a>
+      </div>
+
+      <div class="card quiet">
+        <p class="micro">After install</p>
+        <p class="muted">Open SonicCare Pro, allow microphone access, and run the self-test. The app expires in 7 days; SideStore refreshes it while LocalDevVPN is connected. Your results stay on the iPhone.</p>
+        <p class="fine">Phase 0B is a self-test, not the final five-step diagnostic flow. The PWA remains the no-expiry fallback.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
