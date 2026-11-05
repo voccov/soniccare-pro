@@ -29,6 +29,7 @@ jobs:
 
       - name: Build unsigned device app
         run: |
+          set +e
           xcodebuild \
             -project SonicCarePro.xcodeproj \
             -scheme SonicCarePro \
@@ -39,7 +40,20 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            build
+            build 2>&1 | tee build.log
+          status=${PIPESTATUS[0]}
+          echo "xcodebuild status: $status"
+          exit "$status"
+
+      - name: Publish failure log
+        if: failure()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: native-log
+          name: Native build log
+          prerelease: true
+          make_latest: false
+          files: build.log
 
       - name: Package unsigned IPA
         run: |
