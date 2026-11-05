@@ -1,0 +1,23 @@
+# Build output
+.build/
+.swiftpm/
+DerivedData/
+dist/
+xtool/
+*.ipa
+*.xcarchive
+*.app
+
+# Local config and secrets
+.env
+.env.*
+!.env.example
+keys/
+secrets/
+
+# Runtime data and logs
+data/
+logs/
+
+# OS noise
+.DS_Store
