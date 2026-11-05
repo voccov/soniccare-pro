@@ -20,7 +20,7 @@ targets:
       - path: Sources/SonicCarePro
         excludes:
           - Info.plist
-      - path: Resources
+      - path: Resources/PiPGuide.mp4
         buildPhase: resources
     settings:
       base:
