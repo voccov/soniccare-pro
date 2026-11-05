@@ -1,10 +1,12 @@
 # Status — SonicCare Pro
 
 **Version:** `0.1.0-dev.3`  
-**Phase:** 0A — PWA built; 0B native proof next  
+**Phase:** 0A — PWA accuracy pass; 0B native proof held for real data  
 **Last updated:** 2026-11-05  
-**State:** GitHub repo connected and plan pushed. Phase 0A PWA is **live on GitHub Pages**;
-native app code has not started. The next step is a real AirPods test in Safari.
+**State:** GitHub repo connected and plan pushed. Phase 0A PWA is **live on GitHub Pages**
+and has been upgraded with a vocal gate, friction-ratio scratch check, adaptive 8 kHz
+bandwidth detection, automatic stream re-lock, a cleaning guide and a 2-hour dry timer.
+Native app code has not started; it is held until the real AirPods JSON is in.
 
 ## Done
 
@@ -16,9 +18,13 @@ native app code has not started. The next step is a real AirPods test in Safari.
 - Phase 0A PWA built in `web/` and **deployed live**:
   - microphone capture with processing disabled;
   - cross-phase, band-integrated SVR;
-  - single-channel scratch check;
+  - single-channel scratch check with a high-band friction ratio;
+  - vocal-gated capture so hesitation does not count as silence;
+  - adaptive 8 kHz narrowband detection from the FFT cliff;
+  - automatic stream re-lock when returning from Settings;
+  - cleaning guide and 2-hour drying timer;
   - demo mode;
-  - localStorage and JSON export;
+  - localStorage and JSON export/copy;
   - installable manifest and icons.
 - GitHub Pages workflow deployed successfully:
   <https://voccov.github.io/soniccare-pro/>

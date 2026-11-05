@@ -29,6 +29,8 @@
     </div>
   </header>
 
+  <div id="drying-banner" class="banner hidden" role="status"></div>
+
   <main>
     <section id="intro" class="stack">
       <div class="hero card">
@@ -117,6 +119,7 @@
         <div class="readout">
           <span id="live-db">—</span><span class="unit">dBFS</span>
         </div>
+        <div class="meter capture" aria-hidden="true"><div id="capture-meter"></div></div>
         <canvas id="spectrum" width="640" height="180" aria-label="Live spectrum"></canvas>
         <p class="micro band-label" id="band-label">High band: 3–6.5 kHz</p>
         <div class="actions">
@@ -151,6 +154,25 @@
           <button id="copy" class="secondary" type="button">Copy JSON</button>
           <button id="reset" class="secondary" type="button">Reset</button>
         </div>
+      </div>
+
+      <div class="card" id="cleaning-card">
+        <div class="step-head">
+          <div>
+            <p class="micro">Care</p>
+            <h2>Clean the mesh</h2>
+          </div>
+          <span class="badge">Apple method</span>
+        </div>
+        <p class="muted">Clean only the meshes Apple highlights. Keep liquids out of the openings.</p>
+        <div class="zones">
+          <div class="zone"><span class="zone-num">1</span><div><strong>Stem ring</strong><p>Primary call microphone at the bottom.</p></div></div>
+          <div class="zone"><span class="zone-num">2</span><div><strong>Speaker mesh</strong><p>Under the silicone tip.</p></div></div>
+          <div class="zone"><span class="zone-num">3</span><div><strong>Outer ANC mesh</strong><p>The black outer grille.</p></div></div>
+          <div class="zone"><span class="zone-num">4</span><div><strong>Inner pressure port</strong><p>Do not poke it with tools.</p></div></div>
+        </div>
+        <p class="fine"><strong>Apple's method:</strong> micellar water with PEG-6 Caprylic/Capric Glycerides, a soft children's toothbrush, blot on a paper towel, rinse with distilled water, then dry for at least 2 hours. No ethanol on the mesh, no compressed air, no vacuum, no Blu-Tack, no sharp tools.</p>
+        <button id="dry-timer" class="secondary" type="button">Start 2-hour dry timer</button>
       </div>
 
       <div class="card quiet">

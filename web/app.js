@@ -3,7 +3,10 @@
 
   const VERSION = "0.1.0-dev.3";
   const STORAGE_KEY = "soniccare.pwa.v1";
+  const DRY_KEY = "soniccare.dryUntil";
   const SCRATCH_THRESHOLD_DB = 18;
+  const GATE_MIN_DB = -45;
+  const GATE_MAX_DB = -5;
   const THRESHOLDS = {
     healthyMin: -6,
     healthyMax: 4,
@@ -33,6 +36,9 @@
     scratch: $("#scratch"),
     scratchMeter: $("#scratch-meter"),
     scratchResult: $("#scratch-result"),
+    captureMeter: $("#capture-meter"),
+    dryingBanner: $("#drying-banner"),
+    dryTimer: $("#dry-timer"),
     phaseBadge: $("#phase-badge"),
     liveDb: $("#live-db"),
     spectrum: $("#spectrum"),
@@ -58,6 +64,7 @@
     audio: null,
     busy: false,
     spectrumRAF: 0,
+    reacquirePending: false,
   };
 
   els.version.textContent = VERSION;
@@ -77,18 +84,32 @@
   els.export.addEventListener("click", exportJson);
   els.copy.addEventListener("click", copyJson);
   els.reset.addEventListener("click", resetSession);
+  els.dryTimer.addEventListener("click", startDryTimer);
 
   document.querySelectorAll("[data-ear]").forEach((button) => {
     button.addEventListener("click", () => selectEar(button.dataset.ear));
   });
 
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState !== "visible") return;
-    if (state.audio?.context?.state === "suspended") {
-      state.audio.context.resume().catch(() => {});
+  document.addEventListener("visibilitychange", async () => {
+    if (document.visibilityState === "hidden") {
+      if (state.audio) state.reacquirePending = true;
+      return;
     }
-    if (state.audio?.track?.readyState === "ended") {
-      setStatus("Input disconnected. Tap Reconnect input.", "bad");
+    if (!state.audio) return;
+    if (state.audio.context.state === "suspended") {
+      await state.audio.context.resume().catch(() => {});
+    }
+    if (state.reacquirePending) {
+      state.reacquirePending = false;
+      setStatus("Re-locking Bluetooth input…", "warn");
+      els.testStatus.textContent = "Re-locking the input after Settings…";
+      await delay(300);
+      try {
+        await reacquireAudio();
+      } catch {
+        els.testStatus.textContent = "Could not re-lock the input. Tap Reconnect input.";
+        setStatus("Input not locked", "bad");
+      }
     }
   });
 
@@ -101,12 +122,13 @@
       button.classList.toggle("selected", button.dataset.ear === ear);
     });
     els.earLabel.textContent = ear === "left" ? "Left" : "Right";
+    els.bandLabel.textContent = `High band: ${highBandLabel()}`;
     updatePhaseBadge();
     updateScratchUi();
     saveState();
   }
 
-  async function enableMic(demo = false) {
+  async function enableMic(demo = false, silent = false) {
     els.introError.classList.add("hidden");
     els.enable.disabled = true;
     els.demo.disabled = true;
@@ -180,14 +202,23 @@
       updateButtons();
       renderReport();
       startSpectrum();
-      setStatus(demo ? "Demo signal" : "Microphone ready", demo ? "warn" : "live");
+      setStatus(demo ? "Demo signal" : silent ? "Input re-locked" : "Microphone ready", demo ? "warn" : "live");
       els.testStatus.textContent = demo
         ? "Demo signal. Results are not your AirPods."
-        : "Ready. Start with “Ahh”.";
+        : silent
+          ? "Input re-locked. Scratch the current ear, then run the test."
+          : "Ready. Start with “Ahh”.";
     } catch (error) {
       const message = error?.name === "NotAllowedError"
         ? "Microphone access is off. Allow it in your browser, or open Settings → Safari → Microphone on iPhone."
         : error?.message || "Could not open the microphone.";
+      if (silent) {
+        els.testStatus.textContent = "Could not re-lock the input. Tap Reconnect input.";
+        setStatus("Input not locked", "bad");
+        els.enable.disabled = false;
+        els.demo.disabled = false;
+        return;
+      }
       els.introError.textContent = message;
       els.introError.classList.remove("hidden");
       els.enable.disabled = false;
@@ -196,7 +227,7 @@
     }
   }
 
-  function stopAudio() {
+  function stopAudio(silent = false) {
     cancelAnimationFrame(state.spectrumRAF);
     if (state.audio) {
       if (state.audio.osc) {
@@ -208,7 +239,12 @@
       state.audio = null;
     }
     els.liveDb.textContent = "—";
-    setStatus("Not connected", "idle");
+    if (!silent) setStatus("Not connected", "idle");
+  }
+
+  async function reacquireAudio() {
+    stopAudio(true);
+    await enableMic(false, true);
   }
 
   function updateInputUi() {
@@ -260,6 +296,21 @@
     els.statusPill.querySelector(".dot").className = `dot ${tone === "live" ? "live" : tone === "warn" ? "warn" : tone === "bad" ? "bad" : ""}`.trim();
   }
 
+  function powerInBand(freqData, binHz, minHz, maxHz) {
+    let sum = 0;
+    const first = Math.max(0, Math.floor(minHz / binHz));
+    const last = Math.min(freqData.length - 1, Math.ceil(maxHz / binHz));
+    for (let i = first; i <= last; i += 1) {
+      const db = freqData[i];
+      if (Number.isFinite(db)) sum += Math.pow(10, db / 10);
+    }
+    return sum;
+  }
+
+  function dbFromPower(power) {
+    return 10 * Math.log10(power + 1e-12);
+  }
+
   async function scratchCheck() {
     if (!state.audio || state.busy) return;
     state.busy = true;
@@ -271,27 +322,37 @@
     els.scratchResult.textContent = "Wait for the cue, then scratch the bottom silver ring with a fingernail for one second.";
     els.scratchMeter.style.width = "0%";
 
-    const data = new Float32Array(state.audio.analyser.fftSize);
+    const analyser = state.audio.analyser;
+    const timeData = new Float32Array(analyser.fftSize);
+    const freqData = new Float32Array(analyser.frequencyBinCount);
+    const binHz = state.audio.contextRate / analyser.fftSize;
     const started = performance.now();
     let baselineRms = 0;
     let baselineFrames = 0;
     let peakRms = 0;
     let peakDb = -100;
+    const postBaseline = [];
 
     while (performance.now() - started < 1700) {
-      state.audio.analyser.getFloatTimeDomainData(data);
+      analyser.getFloatTimeDomainData(timeData);
+      analyser.getFloatFrequencyData(freqData);
       let sum = 0;
-      for (let i = 0; i < data.length; i += 1) sum += data[i] * data[i];
-      const rms = Math.sqrt(sum / data.length) + 1e-9;
+      for (let i = 0; i < timeData.length; i += 1) sum += timeData[i] * timeData[i];
+      const rms = Math.sqrt(sum / timeData.length) + 1e-9;
       const elapsed = performance.now() - started;
       if (elapsed < 380) {
         baselineRms += rms;
         baselineFrames += 1;
       } else {
-        if (rms > peakRms) peakRms = rms;
-        peakDb = Math.max(peakDb, 20 * Math.log10(rms));
-        const width = Math.max(0, Math.min(100, ((peakDb + 80) / 70) * 100));
-        els.scratchMeter.style.width = `${width}%`;
+        const lowPower = powerInBand(freqData, binHz, 150, 800);
+        const frictionPower = powerInBand(freqData, binHz, 2000, 6000);
+        postBaseline.push({ rms, lowPower, frictionPower });
+        if (rms > peakRms) {
+          peakRms = rms;
+          peakDb = 20 * Math.log10(rms);
+          const width = Math.max(0, Math.min(100, ((peakDb + 80) / 70) * 100));
+          els.scratchMeter.style.width = `${width}%`;
+        }
       }
       if (elapsed >= 380 && elapsed < 500) {
         els.scratchResult.textContent = "Scratch now.";
@@ -300,14 +361,36 @@
     }
 
     const baseline = baselineRms / Math.max(baselineFrames, 1);
+    const baselineDb = 20 * Math.log10(baseline + 1e-9);
     const delta = 20 * Math.log10((peakRms + 1e-9) / (baseline + 1e-9));
-    const verified = delta >= SCRATCH_THRESHOLD_DB;
-    state.scratch[ear] = { verified, deltaDb: Number.isFinite(delta) ? delta : null, at: new Date().toISOString() };
-    els.scratchBadge.textContent = verified ? "Verified" : "No spike";
+    const loudFrames = postBaseline.filter((frame) => 20 * Math.log10(frame.rms + 1e-9) > baselineDb + 10);
+    const framesForRatio = loudFrames.length ? loudFrames : postBaseline;
+    const avgLow = framesForRatio.reduce((total, frame) => total + frame.lowPower, 0) / Math.max(framesForRatio.length, 1);
+    const avgFriction = framesForRatio.reduce((total, frame) => total + frame.frictionPower, 0) / Math.max(framesForRatio.length, 1);
+    const lowDb = dbFromPower(avgLow);
+    const frictionDb = dbFromPower(avgFriction);
+    const frictionRatioDb = frictionDb - lowDb;
+    const ratioOk = frictionRatioDb >= -10;
+    const verified = delta >= SCRATCH_THRESHOLD_DB && ratioOk;
+
+    state.scratch[ear] = {
+      verified,
+      deltaDb: Number.isFinite(delta) ? delta : null,
+      lowDb: Number.isFinite(lowDb) ? lowDb : null,
+      frictionDb: Number.isFinite(frictionDb) ? frictionDb : null,
+      ratioDb: Number.isFinite(frictionRatioDb) ? frictionRatioDb : null,
+      at: new Date().toISOString(),
+    };
+
+    els.scratchBadge.textContent = verified ? "Verified" : delta >= SCRATCH_THRESHOLD_DB ? "Not mechanical" : "No spike";
     els.scratchBadge.className = `badge ${verified ? "good" : "warn"}`;
-    els.scratchResult.textContent = verified
-      ? `Verified: the ${earName} microphone is live.`
-      : `No spike. iOS is probably still using the other microphone. Check Settings, then tap Reconnect input.`;
+    if (verified) {
+      els.scratchResult.textContent = `Verified: the ${earName} microphone is live.`;
+    } else if (delta >= SCRATCH_THRESHOLD_DB) {
+      els.scratchResult.textContent = "Loud, but not a stem scratch. A voice, cough or table thud does not count. Scratch the bottom silver ring with a fingernail.";
+    } else {
+      els.scratchResult.textContent = "No spike. iOS is probably still using the other microphone. Check Settings, then tap Reconnect input.";
+    }
     state.busy = false;
     updateButtons();
     saveState();
@@ -318,10 +401,10 @@
     state.busy = true;
     updateButtons();
     const isLf = kind === "lf";
-    const [lo, hi] = isLf ? [150, 800] : highBand();
     const label = isLf ? "Ahh" : "Ssss";
     els.phaseBadge.textContent = "Get ready";
     els.phaseBadge.className = "badge warn";
+    els.captureMeter.style.width = "0%";
     els.testStatus.textContent = `Get ready to say “${label}”.`;
 
     for (let i = 3; i >= 1; i -= 1) {
@@ -329,32 +412,61 @@
       await delay(500);
     }
 
-    els.testStatus.textContent = `Say “${label}” now.`;
-    els.phaseBadge.textContent = "Listening";
     const analyser = state.audio.analyser;
-    const bins = analyser.frequencyBinCount;
-    const data = new Float32Array(bins);
+    const timeData = new Float32Array(analyser.fftSize);
+    const freqData = new Float32Array(analyser.frequencyBinCount);
     const binHz = state.audio.contextRate / analyser.fftSize;
-    const started = performance.now();
-    let totalPower = 0;
-    let frames = 0;
+    const bands = isLf
+      ? { lf: [150, 800] }
+      : { hfWide: [3000, 6500], mid: [2000, 3500], cliff: [4200, 7000] };
+    const sums = {};
+    Object.keys(bands).forEach((key) => { sums[key] = 0; });
 
-    while (performance.now() - started < 3000) {
-      analyser.getFloatFrequencyData(data);
-      let framePower = 0;
-      for (let i = 0; i < bins; i += 1) {
-        const frequency = i * binHz;
-        if (frequency < lo || frequency > hi) continue;
-        const db = data[i];
-        if (Number.isFinite(db)) framePower += Math.pow(10, db / 10);
+    let activeMs = 0;
+    let frames = 0;
+    let last = performance.now();
+    const started = performance.now();
+
+    while (activeMs < 3000 && performance.now() - started < 10000) {
+      const now = performance.now();
+      const dt = Math.min(50, now - last);
+      last = now;
+
+      analyser.getFloatTimeDomainData(timeData);
+      let sum = 0;
+      for (let i = 0; i < timeData.length; i += 1) sum += timeData[i] * timeData[i];
+      const rms = Math.sqrt(sum / timeData.length) + 1e-9;
+      const rmsDb = 20 * Math.log10(rms);
+      const gated = rmsDb >= GATE_MIN_DB && rmsDb <= GATE_MAX_DB;
+
+      if (gated) {
+        analyser.getFloatFrequencyData(freqData);
+        Object.entries(bands).forEach(([key, [lo, hi]]) => {
+          sums[key] += powerInBand(freqData, binHz, lo, hi);
+        });
+        activeMs += dt;
+        frames += 1;
+        els.captureMeter.style.width = `${Math.min(100, (activeMs / 3000) * 100)}%`;
+        els.testStatus.textContent = `Keep holding “${label}”… ${Math.min(3, activeMs / 1000).toFixed(1)}s`;
+      } else if (activeMs > 0) {
+        els.testStatus.textContent = `Keep holding “${label}”…`;
+      } else {
+        els.testStatus.textContent = `Say “${label}” now.`;
       }
-      totalPower += framePower;
-      frames += 1;
+
       await delay(20);
     }
 
-    const averagePower = totalPower / Math.max(frames, 1);
-    const db = 10 * Math.log10(averagePower + 1e-12);
+    if (activeMs < 2500 || frames === 0) {
+      els.phaseBadge.textContent = "No signal";
+      els.phaseBadge.className = "badge warn";
+      els.testStatus.textContent = "We didn't hear enough. Move the phone closer or try again in a quieter room.";
+      state.busy = false;
+      updateButtons();
+      return;
+    }
+
+    const dbFor = (key) => dbFromPower(sums[key] / frames);
     const ear = state.activeEar;
     const capture = state.captures[ear] || {
       ear,
@@ -365,8 +477,23 @@
       hfDb: null,
       svrDb: null,
     };
-    if (isLf) capture.lfDb = db;
-    else capture.hfDb = db;
+
+    if (isLf) {
+      capture.lfDb = dbFor("lf");
+    } else {
+      const hfWideDb = dbFor("hfWide");
+      const midDb = dbFor("mid");
+      const cliffDb = dbFor("cliff");
+      const narrow = state.audio.sampleRate <= 8000 || (midDb > -50 && cliffDb < midDb - 18);
+      capture.hfWideDb = hfWideDb;
+      capture.midDb = midDb;
+      capture.cliffDb = cliffDb;
+      capture.hfDb = narrow ? midDb : hfWideDb;
+      capture.hfBand = narrow ? "2–3.5 kHz" : "3–6.5 kHz";
+      capture.bandwidth = narrow ? "8 kHz / narrow" : "wideband";
+      capture.confidence = narrow ? "Low" : "Medium";
+    }
+
     if (Number.isFinite(capture.lfDb) && Number.isFinite(capture.hfDb)) {
       capture.svrDb = capture.hfDb - capture.lfDb;
     }
@@ -381,6 +508,9 @@
     updatePhaseBadge();
     renderReport();
     saveState();
+    if (!isLf) {
+      els.bandLabel.textContent = `High band: ${capture.hfBand} · ${capture.confidence} confidence`;
+    }
 
     const complete = Number.isFinite(capture.lfDb) && Number.isFinite(capture.hfDb);
     els.testStatus.textContent = complete
@@ -420,11 +550,14 @@
       els.scratchResult.textContent = "Not checked yet. No spike means the other microphone is still active.";
       return;
     }
-    els.scratchBadge.textContent = result.verified ? "Verified" : "No spike";
+    const loud = Number.isFinite(result.deltaDb) && result.deltaDb >= SCRATCH_THRESHOLD_DB;
+    els.scratchBadge.textContent = result.verified ? "Verified" : loud ? "Not mechanical" : "No spike";
     els.scratchBadge.className = `badge ${result.verified ? "good" : "warn"}`;
     els.scratchResult.textContent = result.verified
       ? `Verified: the ${state.activeEar} microphone is live.`
-      : "No spike on the last check. Check the selected microphone, then try again.";
+      : loud
+        ? "Loud, but not a stem scratch. A voice, cough or table thud does not count. Scratch the bottom silver ring with a fingernail."
+        : "No spike on the last check. Check the selected microphone, then try again.";
   }
 
   function renderReport() {
@@ -445,10 +578,15 @@
     const l = left.svrDb;
     const r = right.svrDb;
     const spread = Math.abs(l - r);
+    const bandwidthMismatch = Boolean(left.bandwidth && right.bandwidth && left.bandwidth !== right.bandwidth);
+    const narrow = left.bandwidth === "8 kHz / narrow" || right.bandwidth === "8 kHz / narrow";
     let category = "Inconclusive";
     let tone = "";
 
-    if (l < THRESHOLDS.severe || r < THRESHOLDS.severe) {
+    if (bandwidthMismatch) {
+      category = "Inconclusive";
+      tone = "warn";
+    } else if (l < THRESHOLDS.severe || r < THRESHOLDS.severe) {
       category = `${l < r ? "Left" : "Right"} severely blocked`;
       tone = "bad";
     } else if (l < THRESHOLDS.bilateralMax && r < THRESHOLDS.bilateralMax && spread < THRESHOLDS.bilateralSpread) {
@@ -465,9 +603,12 @@
       tone = "good";
     }
 
+    const notes = [];
+    if (bandwidthMismatch) notes.push("Different input bandwidths; compare with caution.");
+    else if (narrow) notes.push("8 kHz narrowband; low confidence.");
     els.category.textContent = category;
     els.category.className = tone ? `status-${tone}` : "";
-    els.verdict.textContent = `${demo ? "Demo signal. " : ""}Left SVR ${l.toFixed(1)} dB · Right SVR ${r.toFixed(1)} dB · Difference ${spread.toFixed(1)} dB.`;
+    els.verdict.textContent = `${demo ? "Demo signal. " : ""}Left SVR ${l.toFixed(1)} dB · Right SVR ${r.toFixed(1)} dB · Difference ${spread.toFixed(1)} dB.${notes.length ? ` ${notes.join(" ")}` : ""}`;
     updateButtons();
   }
 
@@ -537,10 +678,39 @@
     }
   }
 
+  function startDryTimer() {
+    const until = Date.now() + 2 * 60 * 60 * 1000;
+    try { localStorage.setItem(DRY_KEY, String(until)); } catch { /* storage disabled */ }
+    renderDryingBanner();
+    els.testStatus.textContent = "2-hour drying timer started. Keep the AirPods out of the case until it ends.";
+  }
+
+  function renderDryingBanner() {
+    if (!els.dryingBanner) return;
+    let until = 0;
+    try { until = Number(localStorage.getItem(DRY_KEY) || 0); } catch { until = 0; }
+    const remaining = until - Date.now();
+    if (!until || remaining <= 0) {
+      els.dryingBanner.classList.add("hidden");
+      els.dryingBanner.textContent = "";
+      if (until) {
+        try { localStorage.removeItem(DRY_KEY); } catch { /* storage disabled */ }
+      }
+      return;
+    }
+    const totalSeconds = Math.ceil(remaining / 1000);
+    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    els.dryingBanner.textContent = `Drying in progress · ${hours}:${minutes}:${seconds} remaining · Keep the AirPods out of the case until dry before retesting.`;
+    els.dryingBanner.classList.remove("hidden");
+  }
+
   function resetSession() {
     if (!window.confirm("Reset both ears and the scratch results?")) return;
     state.captures = {};
     state.scratch = {};
+    els.captureMeter.style.width = "0%";
     saveState();
     updatePhaseBadge();
     updateScratchUi();
@@ -641,4 +811,6 @@
   updatePhaseBadge();
   updateScratchUi();
   renderReport();
+  renderDryingBanner();
+  setInterval(renderDryingBanner, 1000);
 })();

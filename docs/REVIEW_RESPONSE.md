@@ -10,6 +10,23 @@ This records what we accepted, what we rejected, and why. The current plan is in
 
 ---
 
+## Round 3 — post-PWA review
+
+| # | Point | Verdict | Action |
+|---|---|---|---|
+| 1 | Safari 48 kHz resampling hides 8 kHz HFP | **Accepted** | Added FFT-cliff bandwidth detection and an adaptive 2–3.5 kHz band. |
+| 2 | Scratch can false-positive on voice/thuds | **Accepted** | Added a 2–6 kHz vs 150–800 Hz friction-ratio test. |
+| 3 | Stream dies after switching mics in Settings | **Accepted** | Auto re-lock on `visibilitychange`; manual Reconnect remains. |
+| 4 | Static 3 s capture includes hesitation silence | **Accepted** | Added a vocal gate; only frames inside the speech window accumulate. |
+| 5 | PWA needs cleaning + 2-hour dry timer | **Accepted** | Added Apple’s method, four zones, and a persistent dry countdown. |
+| 6 | PWA can do PiP and light haptics | **Partially accepted** | HTML5 video PiP and Safari switch haptics are possible; not implemented; full CoreHaptics remains native. |
+| 7 | iOS 26.7.2 does not exist | **Rejected** | iOS 26.7.1 exists; 26.7.2 is plausible as a later 26.7 update. Trust About. |
+| 8 | PWA is 98% complete | **Rejected as overstated** | It now covers the measurement, scratch, cleaning and export; route verification, PiP and full haptics remain native advantages. |
+| 9 | Use the supplied byte-FFT/canvas-PiP code | **Partially rejected** | Kept the concepts; used float FFT data and avoided canvas-capture PiP. |
+| 10 | Hold native until real PWA data | **Accepted** | Native Phase 0B is on hold until real AirPods JSON is exported. |
+
+---
+
 ## Round 1 — disposition
 
 | # | Point | Verdict | Action |

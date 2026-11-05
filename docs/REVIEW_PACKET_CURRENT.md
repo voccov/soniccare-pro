@@ -6,6 +6,12 @@ end, and name the top three risks.
 
 ## 1. Current status — what actually exists
 
+> **Update after the first review:** the live PWA now has vocal-gated capture,
+> friction-ratio scratch detection, adaptive 8 kHz bandwidth detection, automatic stream
+> re-lock on return from Settings, a 4-zone cleaning guide, a 2-hour dry timer, and
+> Copy JSON. PWA PiP and light haptics are possible but not implemented; full CoreHaptics
+> remains native-only. Native is on hold until real AirPods captures are exported.
+
 - The owner is a non-developer, remote, reading on an iPhone. AirPods Pro (2nd gen),
   iOS 26.7.2. A spare free Apple ID is ready.
 - A **PWA** is live and publicly reachable:
@@ -74,8 +80,10 @@ does not claim to fix hardware.
   `HF_dB` from Phase B “Ssss” (3–6.5 kHz);
   `SVR_dB = HF_dB − LF_dB`, using band-integrated power, not mean per bin.
 - Results are saved locally; JSON export/copy; no audio upload or storage.
-- PWA limits: no port-type verification, no haptics, no PiP, no background audio, no
-  native feel, localStorage can be cleared by the browser.
+- PWA limits: no port-type verification, no full CoreHaptics, no PiP yet (HTML5 video PiP
+  is possible), no background audio, no native feel, localStorage can be cleared by the
+  browser. Light haptic ticks are possible via Safari’s `<input switch>` behavior, but
+  they are not a substitute for CoreHaptics.
 
 ### 3.2 Native iOS (planned)
 

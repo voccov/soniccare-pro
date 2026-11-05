@@ -11,6 +11,9 @@ semver.
 
 - Phase 0A PWA validation app in `web/`: on-device microphone capture, cross-phase SVR,
   scratch check, demo mode, localStorage, JSON export, installable manifest.
+- Vocal-gated capture, friction-ratio scratch detection, adaptive 8 kHz bandwidth
+  detection, automatic stream re-lock on return from Settings, a 4-zone cleaning guide,
+  a 2-hour drying timer, and Copy JSON.
 - GitHub Pages deployment workflow.
 
 ### Fixed
