@@ -38,16 +38,19 @@ Ask: would a fluent iPhone user trust this app, or pause at off-spec controls?
       fake charts, confetti, shimmer, stock AI art.
 - [ ] The AirPods hero and the four-zone diagram are custom vectors, not clip art.
 - [ ] Empty, loading, error and permission states exist and teach the next step.
+- [ ] No 0–100 ring or gauge; the report leads with a category and measured dB.
+- [ ] Tertiary text is `#8E8E93`, not `#6E6E76`.
 
 ## UX contract
 
 - [ ] The user always knows: what this is, what to do, what happens next.
-- [ ] Guide me is the default; Quick test is available and remembered.
+- [ ] One linear flow; inline explanations; no mode toggle.
 - [ ] Every optional step has a visible skip; critical skips state the loss once.
 - [ ] Skipped data shows `Not tested`; no fabricated values.
 - [ ] The flow resumes after Settings, a call or a relaunch.
 - [ ] No dead ends; every error has one next action.
 - [ ] The report separates measured from not measured and gives one next step.
+- [ ] Bilateral loss is possible; a matching L/R pair is not automatically “healthy”.
 - [ ] No modal tour; tips are inline and dismissible.
 
 ## Copy contract
@@ -56,15 +59,16 @@ Ask: would a fluent iPhone user trust this app, or pause at off-spec controls?
 - [ ] No banned words from `docs/COPY.md`; no exclamation marks; no "Oops".
 - [ ] Errors say what happened and what to do.
 - [ ] No medical claim, no fake precision, no guaranteed repair.
-- [ ] Pseudo-localization at +30% does not truncate the primary action.
+- [ ] No “one-tap Bluetooth settings” promise; the manual path is clear.
 
 ## Evidence
 
 - [ ] Simulator screenshots at iPhone 16 Pro and a small iPhone.
 - [ ] Dark mode and large Dynamic Type captured.
 - [ ] `performAccessibilityAudit` passes or the exceptions are documented.
-- [ ] `scripts/check-copy.sh`, `scripts/check-tokens.sh`, `scripts/check-contrast.sh`
-      pass.
+- [ ] `scripts/check-docs.sh` passes (version, changelog, local URLs, personal
+      identifiers).
+- [ ] Copy/token/contrast scripts, once they exist, pass.
 - [ ] Hardware-only checks (mic, PiP, haptics, Bluetooth) reported separately from the
       Simulator evidence; never claim a hardware pass from a Simulator.
 
@@ -76,5 +80,6 @@ Ask: would a fluent iPhone user trust this app, or pause at off-spec controls?
 
 ## Current state
 
-Phase 0 has not produced UI yet. The first design review happens after the three-screen
-design proof is built and captured in the Simulator.
+Phase 0A/0B has not produced native UI yet. The first design review happens after the
+three-screen native design proof is built and captured in the Simulator. The PWA
+validation is reviewed separately for layout and copy, not for native behavior.

@@ -3,28 +3,28 @@
 The flow is a guided check, not a course. It must be usable by someone who has never
 tested a microphone, while staying out of the way for someone who just wants the result.
 
+One linear flow. Inline guidance. A visible skip on every optional step. No mode toggle.
+
 ## Flow
 
 ```
 Start
   → Pre-flight (permission, route, quiet room)
   → Connection (AirPods / demo)
-  → Side setup (left, then right; PiP guide)
-  → Voice test (Aaaa and Ssss, per ear)
-  → Report (verdict, score, spectral diff)
-  → Recovery (four zones, safety, 165 Hz, retest)
+  → Side setup (left, then right; PiP video; fingernail scratch)
+  → Voice test (Ahh and Ssss, per ear)
+  → Report (category, dB delta, spectral diff)
+  → Recovery (four zones, safety, retest)
   → Done / Before-after
 ```
 
-## Guidance modes
+## Guidance
 
-- **Guide me** (default): one-line instruction, inline "Why" disclosure, a visual where
-  it helps, and a clear primary action. Tips appear once and are remembered as dismissed.
-- **Quick test**: the same safety and honesty rules, but explanations collapse into a
-  single line and the "Why" links remain available. For a returning user.
-- The mode is chosen on the start screen and remembered. A "Show tips" switch in Settings
-  can restore guidance without changing the mode.
-- No modal tour. No repeated coach marks. No popup on every launch.
+- One-line instruction per screen, plus an inline “Why” disclosure where it helps.
+- A visual only when it replaces a paragraph.
+- Tips appear once and stay dismissed.
+- No modal tour, no repeated coach marks, no popup on every launch.
+- A returning user can skip the explanation, not the honesty rules.
 
 ## Skip matrix
 
@@ -35,7 +35,7 @@ Visible as a text link, never a competing button.
 | Pre-flight | Use the iPhone microphone in demo mode; every result is labelled Demo. |
 | Connection | Same as pre-flight; the report says the route was not verified. |
 | Side setup | Single-ear check; no left/right comparison. The report says so. |
-| Voice phase | Missing band is shown as Not tested; no score for incomplete data. |
+| Voice phase | Missing band is shown as Not tested; no category for incomplete data. |
 | Ear test | Only the completed ear is reported; the other is Not tested. |
 | Recovery | Exit; the baseline stays saved. |
 | Report | Not applicable; this is the result. |
@@ -49,8 +49,8 @@ missing. The app never fills a gap with a guess.
 
 - Status pill: `AirPods Pro · Connected`, `iPhone microphone`, or `Demo`.
 - One headline, two lines of explanation, one primary button: `Start check`.
-- Secondary: `Quick test` (if a previous result exists) and `How it works`.
-- Last result card if a baseline exists: date, left/right score, `See result`.
+- Secondary: `How it works`.
+- Last result card if a baseline exists: date, left/right category, `See result`.
 - Settings in the toolbar.
 
 ### Pre-flight
@@ -72,11 +72,15 @@ missing. The app never fills a gap with a guess.
 ### Side setup
 
 - Three-step visual: Settings → Bluetooth → (i) → Microphone → Always Left/Right.
-- `Open Settings` (private URL first, public Settings fallback).
-- `Start floating guide` when PiP is available; otherwise the steps stay on screen.
+- No one-tap Bluetooth settings promise. The primary path is the visual and the PiP video;
+  a Control Center long-press tip may be shown, but it is not guaranteed.
+- `Start floating guide` plays the bundled `PiPGuide.mp4` in a standard video PiP window.
+  If PiP is unavailable, the checklist stays on screen.
 - On return: `Which microphone did you set?` segmented control.
-- `Test left microphone`: ask the user to tap the bottom of the target stem for two
-  seconds. Adaptive threshold; success haptic; `Left microphone confirmed`.
+- `Test left microphone`: ask the user to **lightly scratch the bottom silver ring with a
+  fingernail for one second**. Do not tap the stem; the force sensor can trigger a gesture.
+  Detect a broadband transient above an adaptive noise floor; the opposite ear should not
+  show the same spike. Success haptic; `Left microphone confirmed`.
 - `Skip side check` marks the comparison unverified; the report says so.
 
 ### Voice test
@@ -90,18 +94,21 @@ missing. The app never fills a gap with a guess.
 - After each phase: a small check and a beat before the next; the user can pause.
 - At the ear change: `Now the right ear. Switch the microphone in Settings, then come
   back.` State is saved.
+- The app computes SVR per ear, not only left vs right.
 
 ### Report
 
-- Verdict first: `Right microphone is muffled`, `Both microphones look similar`, or
-  `Not enough data`.
-- Score and confidence; `What this means` disclosure.
-- `What we measured`: left/right sensitivity, high-frequency roll-off, SVR.
+- Verdict first: `Balanced`, `Right high-frequency loss`, `Left high-frequency loss`,
+  `Both high-frequency loss`, `Severely blocked`, or `Not enough data`.
+- Measured dB delta and SVR values; a confidence label.
+- `What this means` disclosure.
+- `What we measured`: left/right SVR, high-frequency roll-off, measured dB difference.
 - `What we didn't measure`: absolute calibration, firmware, serial, battery, hardware
   fault.
 - Spectral diff chart; the muffled band is annotated with the measured dB difference.
 - Primary: `Clean and test again` when muffled; otherwise `Test again`.
-- Secondary: `Save result`, `Share result` (later), `See cleaning guide`.
+- Secondary: `Save result`, `Export baseline`, `See cleaning guide`.
+- No 0–100 headline score.
 
 ### Recovery
 
@@ -109,17 +116,17 @@ missing. The app never fills a gap with a guess.
   air, no sharp tools.
 - Four zone cards: stem ring, speaker mesh, outer ANC mesh, inner pressure/mic port.
 - Each card says what the zone does, what to do, and what not to do.
-- 165 Hz tone card: `Take the AirPods out of your ears and the case. Place them mesh-down.
-  Keep the volume low. Stop if it feels wrong.` A 20-second timer and a stop button.
 - `Test again` and before/after comparison; no "fixed" claim without a measurement.
+- A 165 Hz tone is not part of the MVP. If it is ever added, it is a clearly labelled
+  future experiment with Automatic Ear Detection off, buds out of the ears, mesh down,
+  low volume, and no repair promise.
 
 ### Settings
 
-- Guidance: Guide me / Quick test, Show tips.
 - Demo mode.
 - Language: English; Swedish later.
 - Privacy: audio stays on device; no network.
-- Data: reset baseline and history.
+- Data: export baseline, import baseline, reset history.
 - About: version, signing expiry, `Send diagnostics` (share a local log).
 
 ## States
@@ -132,20 +139,29 @@ Design every one of these; no blank screens.
 - **Wrong route:** `iOS is using the iPhone microphone. Open Control Center and check the
   audio route.`
 - **Low signal:** retry guidance, not a failure verdict.
+- **Bilateral loss:** `Both microphones are quieter in the high frequencies. This can
+  happen when both meshes are blocked or damp.`
 - **Interrupted:** `Your progress is saved. Continue when you're ready.`
-- **Signing expiring:** `This build expires in N days. Refresh it in SideStore.`
+- **Signing expiring:** `This build expires in N days. Export your baseline and refresh
+  it in SideStore.`
 - **No baseline:** `No previous result yet. After this check, you can compare.`
 - **Loading:** a calm skeleton or a one-line status, never a spinner in the middle of
   content.
 
 ## Resume and persistence
 
-- Persist the current step, mode, ear, phase and captured data after every meaningful
-  change.
+- Persist the current step, ear, phase and captured data after every meaningful change.
 - If the app is backgrounded for Settings or a call, return to the same place with a
   short `Welcome back` line, not a restart.
 - Store results locally in Application Support; no cloud. Keep the last 10 sessions.
-- A re-sign via SideStore must not erase data.
+- Export/import baseline JSON; a re-sign via SideStore must not erase data.
+- Keep a signing-expiry warning visible in About and before a long gap.
+
+## PWA validation
+
+The Phase 0A PWA mirrors this flow without PiP, haptics or route verification. It is a
+validation tool and a no-expiry fallback, not a second product. Its data export informs
+the native bilateral thresholds.
 
 ## Accessibility
 

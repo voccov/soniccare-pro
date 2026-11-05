@@ -10,9 +10,13 @@ if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
   fail=1
 fi
 
-for file in README.md docs/SETUP.md docs/STATUS.md docs/PLAN.md; do
+for file in README.md docs/SETUP.md docs/STATUS.md docs/PLAN.md docs/REVIEW_RESPONSE.md docs/PLAN_FOR_REVIEW.md; do
   if grep -nE 'https?://(127\.0\.0\.1|localhost)' "$file" >/dev/null 2>&1; then
     printf 'Local URL found in %s\n' "$file" >&2
+    fail=1
+  fi
+  if grep -nE '([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})|ts\.net|(^|[^0-9])100\.[0-9]{1,3}\.|[0-9A-Fa-f]{40}' "$file" >/dev/null 2>&1; then
+    printf 'Personal identifier found in %s\n' "$file" >&2
     fail=1
   fi
 done

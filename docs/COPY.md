@@ -29,6 +29,7 @@ Also banned:
 - "Diagnose" as a medical claim. Use "check" and "result".
 - Emoji in interface copy.
 - Long paragraphs inside a screen. Two or three lines, then a disclosure.
+- A 0–100 score presented as a lab result.
 
 ## Glossary
 
@@ -42,6 +43,7 @@ Also banned:
 | Not tested | A step that was skipped. Never fill it with a guess. |
 | Demo | Built-in microphone or simulated signal; always labelled. |
 | Muffled | Plain-language result; not a diagnosis. |
+| High-frequency loss | The measured category; not "soap film". |
 | Confidence | How much the app trusts the comparison: High, Medium, Low. |
 
 ## Screen copy examples
@@ -62,10 +64,10 @@ Also banned:
 **Side setup**
 - `Set the microphone to Left`
 - `Open Settings, tap your AirPods, then Microphone, then Always Left.`
-- `Open Settings`
+- `Long-press the Bluetooth control in Control Center for a shortcut.`
 - `Start floating guide`
 - `I've set it to Left`
-- `Tap the bottom of the left stem for two seconds.`
+- `Lightly scratch the bottom silver ring with a fingernail for one second.`
 - `Left microphone confirmed.`
 
 **Voice test**
@@ -76,9 +78,12 @@ Also banned:
 - `Skip this phase`
 
 **Report**
-- `Right microphone is muffled`
-- `The right microphone loses 14.2 dB in the high frequencies (3–6.5 kHz). This can happen
+- `Right microphone has high-frequency loss`
+- `The right microphone loses 12.4 dB in the high frequencies (3–6.5 kHz). This can happen
   when the mesh is blocked.`
+- `Both microphones have high-frequency loss`
+- `Both ears are lower in the high frequencies. This can happen when both meshes are
+  blocked or damp.`
 - `What we measured` / `What we didn't measure`
 - `Clean and test again`
 - `Test again`
@@ -88,16 +93,14 @@ Also banned:
 - `Clean the mesh`
 - `Use Apple's method: micellar water and a soft children's toothbrush. No liquids in the
   openings, no compressed air, no sharp tools.`
-- `Play 165 Hz tone`
-- `Take the AirPods out of your ears and the case. Place them mesh-down. Keep the volume
-  low. Stop if it feels wrong.`
 - `Test again and compare`
+- `Export baseline`
 
 **Errors**
 - `Microphone access is off. Open Settings to turn it on, or use the iPhone microphone
   for a demo.`
 - `iOS is using the iPhone microphone. Open Control Center and check the audio route.`
-- `This build expires in 3 days. Refresh it in SideStore.`
+- `This build expires in 3 days. Export your baseline and refresh it in SideStore.`
 
 ## Skip confirmations
 
@@ -110,11 +113,11 @@ Also banned:
 
 ## Localization
 
-- English is the source language. Swedish is a later locale.
-- Keep strings out of views; use `Localizable.xcstrings`.
-- Allow 30% expansion in buttons and labels; test pseudo-localization.
+- English is the source language and the only v1 language.
+- Swedish is a later locale. Keep strings out of views; use `Localizable.xcstrings`.
 - Do not concatenate sentences; use whole-string keys with placeholders.
 - Dates, numbers and units use the system formatters.
+- Pseudo-localization and expansion testing are deferred until a second locale exists.
 
 ## Microcopy test
 

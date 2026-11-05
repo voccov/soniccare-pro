@@ -26,6 +26,7 @@ Do not ship any of these:
 - Exclamation marks, "Oops!", "Uh-oh!", vague "Something went wrong", or blame.
 - More than one accent color, more than one primary button per screen, or a modal as the
   first answer to a layout problem.
+- A 0–100 ring or gauge that looks like a lab result over an uncalibrated Bluetooth codec.
 
 If a screen looks like a generic dark SaaS dashboard, it is wrong.
 
@@ -41,7 +42,7 @@ Implement as semantic `Color` values in `Theme.swift`; never use raw hex in view
 | `line` | `#FFFFFF` at 8% | Hairlines and card top edge |
 | `textPrimary` | `#F5F5F7` | Headlines and body |
 | `textSecondary` | `#A1A1AA` | Supporting copy |
-| `textTertiary` | `#6E6E76` | Disabled and micro-labels |
+| `textTertiary` | `#8E8E93` | Disabled and micro-labels |
 | `accent` | `#0A84FF` | Primary action, selection, focus |
 | `success` | `#30D158` | Confirmed, healthy |
 | `warning` | `#FF9F0A` | Needs attention |
@@ -50,6 +51,8 @@ Implement as semantic `Color` values in `Theme.swift`; never use raw hex in view
 
 Rules: one accent drives interaction. Green, amber and red are state only. Dark-only v1;
 still test increased contrast. Status is never color alone: pair it with an icon and text.
+`textTertiary` is `#8E8E93` (5.64:1 on `surface`); the earlier `#6E6E76` was 3.64:1 and
+failed WCAG AA for small text.
 
 ## Typography
 
@@ -87,7 +90,7 @@ Motion communicates state, never decorates. Respect Reduce Motion.
 |---|---|---|
 | `quick` | 0.18 s ease-out | Press, toggle, small state change |
 | `standard` | 0.28 s ease-in-out | Step push, sheet, content swap |
-| `expressive` | 0.4 s spring (0.4, 0.8) | Success check, score reveal, hero entrance |
+| `expressive` | 0.4 s spring (0.4, 0.8) | Success check, result reveal, hero entrance |
 | `reduce` | 0.15 s crossfade | Replacement when Reduce Motion is on |
 
 - Use the system navigation push and sheet transitions. Do not invent a global
@@ -110,7 +113,7 @@ Build these once and reuse them; variants must share the same vocabulary.
 - `MetricReadout` — monospaced number + unit + label.
 - `LevelRing` — circular input level with a needle-like arc, not a generic progress ring.
 - `SpectrumView` — 16–32 fine bands, drawn with `Canvas`.
-- `EarCard` — left/right result with status, score and a short verdict.
+- `EarCard` — left/right result with category, measured dB delta and a short verdict.
 - `SafetyNote` — amber-bordered note for cleaning or volume warnings.
 - `PermissionCard` — mic/route fix with one action.
 - `EmptyState` — teaches the next step, never "nothing here".

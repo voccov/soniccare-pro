@@ -8,9 +8,11 @@ ios
 
 ## Stack
 
-SwiftUI (iOS 17+), SwiftPM, and `xtool` for Xcode-free builds. Distribution is an
-unsigned IPA built on GitHub Actions macOS, then signed and installed on-device with
-SideStore using a free Apple ID. No TestFlight and no paid developer account in v1.
+SwiftUI (iOS 17+), one app target + one test target, built with XcodeGen and native
+`xcodebuild` on GitHub Actions macOS. Distribution is an unsigned IPA, signed and
+installed on-device with SideStore using a free Apple ID. No `xtool`, no TestFlight, no
+paid developer account in v1. A small PWA validation build may be used before the native
+app to test the acoustic method; it is not the product.
 
 ## Users
 
@@ -55,9 +57,16 @@ medical device.
 - Firmware, serial and battery are not available through public APIs. The app must not
   claim them.
 - Free sideload limits: 3 apps per device including SideStore, 10 App IDs per week,
-  7-day provisioning.
-- No App Store distribution in v1. Private APIs and PiP are acceptable for the personal
-  build, behind a `PERSONAL_BUILD` flag.
+  7-day provisioning. The app is an occasional-use utility, so baseline export/import and
+  a PWA fallback matter.
+- No App Store distribution in v1. Private APIs are avoided; PiP is used only for a
+  bundled guide video behind a `PERSONAL_BUILD` flag.
+- One linear flow with inline guidance and visible skips. No Guide me / Quick test mode
+  toggle.
+- Per-ear SVR plus a bilateral `Both high-frequency loss` category; left/right similarity
+  alone cannot rule out two equally muffled ears.
+- Categorical report plus measured dB delta. No 0–100 headline score.
+- No 165 Hz tone and no Live Activity in the MVP.
 - Dark-only v1 by design, with increased-contrast and Dynamic Type support.
 
 ## Brand Commitments
@@ -71,6 +80,7 @@ medical device.
 ## Evidence on Hand
 
 - The owner's PRD (in the project conversation) and this product record.
+- The independent review (2026-11-05) and its disposition in `docs/REVIEW_RESPONSE.md`.
 - No real acoustic captures, user testimonials, lab measurements, or clinical evidence.
   Do not fabricate any.
 - Apple Support guidance for cleaning AirPods Pro 2 meshes is the safety reference:
@@ -84,6 +94,8 @@ medical device.
    as not tested.
 4. Keep audio on the device.
 5. Native craft over decoration: a precision instrument, not a dashboard.
+6. Prefer a categorical, measured result over a false-precision score.
+7. Check each ear on its own; two equally muffled ears must not pass as healthy.
 
 ## Accessibility & Inclusion
 

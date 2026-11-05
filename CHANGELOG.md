@@ -5,6 +5,38 @@ semver.
 
 ## [Unreleased]
 
+## [0.1.0-dev.2] — 2026-11-05
+
+### Changed
+
+- Build switched from `xtool` to **XcodeGen + native `xcodebuild`** on GitHub Actions
+  macOS; one app target + one test target.
+- Added a **PWA validation/fallback** track for the acoustic method.
+- Added **per-ear SVR** and a `Both high-frequency loss` category.
+- Report leads with a **categorical verdict + measured dB**; removed the 0–100 headline.
+- PiP uses a bundled looping MP4 + `AVPlayerLayer`; removed the sample-buffer renderer.
+- One linear flow with inline guidance and skip; removed the Guide me / Quick test toggle.
+- Side verification uses a **fingernail scratch**; no stem tap.
+- Removed the `App-Prefs:` one-tap promise; manual Settings path and PiP video.
+- Tertiary text changed from `#6E6E76` (3.64:1) to `#8E8E93` (5.64:1).
+- Added baseline export/import; signing-expiry warning.
+- Deferred copy/token/contrast lint scripts, screenshot automation and
+  pseudo-localization.
+
+### Removed
+
+- 165 Hz water-eject tone from the MVP.
+- Live Activity fallback.
+- Three-module SwiftPM split.
+- `xtool` build path.
+- `App-Prefs:` primary UX.
+- 0–100 score headline.
+
+### Added
+
+- `docs/REVIEW_RESPONSE.md`: disposition of the independent critique.
+- `docs/PLAN_FOR_REVIEW.md` revision 2.
+
 ## [0.1.0-dev] — 2026-11-05
 
 ### Added
