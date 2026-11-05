@@ -19,9 +19,9 @@ end, and name the top three risks.
 - Repo: **https://github.com/voccov/soniccare-pro** (public; no personal data or
   secrets).
 - Version `0.1.0-dev.3`; tag `v0.1.0-dev.3-pwa`; GitHub Pages deployment works.
-- The PWA has been smoke-tested in a desktop browser, including demo capture and report
-  rendering. It has **not yet been tested on the owner’s real AirPods**. That test is the
-  next step.
+- The PWA has been tested on the owner’s real AirPods. First full pair: left SVR −8.1 dB,
+  right SVR −0.95 dB; left is 7.2 dB weaker; both scratch checks verified. One controlled
+  repeat is still needed because the first left run was −13.5 dB.
 - The **native iOS app has not been built yet.** It is planned, not abandoned.
 - **SideStore has not been installed yet.** The one-time PC + USB setup is pending; the
   owner’s PC OS is unknown.
