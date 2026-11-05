@@ -1,0 +1,58 @@
+name: Build native spike
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Sources/**"
+      - "Resources/**"
+      - "Tests/**"
+      - "project.yml"
+      - ".github/workflows/native.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build unsigned device app
+        run: |
+          xcodebuild \
+            -project SonicCarePro.xcodeproj \
+            -scheme SonicCarePro \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package unsigned IPA
+        run: |
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/SonicCarePro.app Payload/
+          zip -qry SonicCarePro.ipa Payload
+          ls -lh SonicCarePro.ipa
+
+      - name: Publish rolling release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: native-latest
+          name: SonicCare native spike
+          prerelease: true
+          make_latest: false
+          files: SonicCarePro.ipa

@@ -1,0 +1,52 @@
+name: SonicCarePro
+options:
+  bundleIdPrefix: com.soniccarepro
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "0.1.0"
+
+targets:
+  SonicCarePro:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources/SonicCarePro
+        excludes:
+          - Info.plist
+    resources:
+      - path: Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.soniccarepro.app
+        PRODUCT_NAME: SonicCarePro
+        INFOPLIST_FILE: Sources/SonicCarePro/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Manual
+
+  SonicCareProTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/SonicCareProTests
+    dependencies:
+      - target: SonicCarePro
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.soniccarepro.app.tests
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  SonicCarePro:
+    build:
+      targets:
+        SonicCarePro: all
+    run:
+      config: Debug
