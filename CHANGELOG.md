@@ -16,6 +16,8 @@ semver.
 - The PWA report requires a confirmed AirPods input and a verified scratch check before it
   shows a diagnostic category; otherwise it shows `Unverified`.
 - The PWA records the input label and sample rate for each phase and flags a changed input.
+- Pre-dev.4 saved captures are migrated to the per-phase input schema, so an existing
+  result survives a reload.
 - Demo mode uses a 220 Hz + 4.5 kHz two-tone signal and reports `Demo only`.
 
 ### Fixed

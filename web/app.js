@@ -815,6 +815,23 @@
     els.testStatus.textContent = "Ready. Start with “Ahh”.";
   }
 
+  function migrateCapture(capture) {
+    if (!capture || typeof capture !== "object") return capture;
+    if (!capture.lfInput && capture.trackLabel) {
+      const input = {
+        label: capture.trackLabel,
+        sampleRate: Number(capture.trackSampleRate) || 0,
+        contextRate: Number(capture.trackSampleRate) || 0,
+        demo: Boolean(capture.demo),
+      };
+      capture.lfInput = { ...input };
+      capture.hfInput = { ...input };
+      capture.lfDemo = Boolean(capture.demo);
+      capture.hfDemo = Boolean(capture.demo);
+    }
+    return capture;
+  }
+
   function loadSaved() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -822,6 +839,7 @@
       const saved = JSON.parse(raw);
       if (saved && typeof saved === "object") {
         state.captures = saved.captures && typeof saved.captures === "object" ? saved.captures : {};
+        Object.values(state.captures).forEach(migrateCapture);
         state.scratch = saved.scratch && typeof saved.scratch === "object" ? saved.scratch : {};
         state.activeEar = saved.activeEar === "right" ? "right" : "left";
       }
