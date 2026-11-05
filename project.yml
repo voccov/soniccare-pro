@@ -48,5 +48,10 @@ schemes:
     build:
       targets:
         SonicCarePro: all
+        SonicCareProTests: [test]
+    test:
+      config: Debug
+      targets:
+        - SonicCareProTests
     run:
       config: Debug

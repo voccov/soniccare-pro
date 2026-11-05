@@ -26,7 +26,7 @@ final class AudioSessionModel: ObservableObject {
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor in
-                self?.refreshRoute()
+                self?.routeChanged()
             }
         }
         refreshRoute()
@@ -71,16 +71,9 @@ final class AudioSessionModel: ObservableObject {
             }
             try session.setActive(true)
 
-            let input = engine.inputNode
-            let format = input.inputFormat(forBus: 0)
+            let format = engine.inputNode.inputFormat(forBus: 0)
             if format.sampleRate > 0, !tapInstalled {
-                input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
-                    let value = Self.rms(buffer)
-                    Task { @MainActor in
-                        self?.rmsDb = value
-                    }
-                }
-                tapInstalled = true
+                installTap()
             }
 
             if !toneConfigured {
@@ -142,6 +135,42 @@ final class AudioSessionModel: ObservableObject {
         generator.prepare()
         generator.impactOccurred()
         status = "Haptic tap"
+    }
+
+    private func installTap() {
+        let input = engine.inputNode
+        let format = input.inputFormat(forBus: 0)
+        guard format.sampleRate > 0, !tapInstalled else { return }
+        input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
+            let value = Self.rms(buffer)
+            Task { @MainActor in
+                self?.rmsDb = value
+            }
+        }
+        tapInstalled = true
+    }
+
+    private func routeChanged() {
+        refreshRoute()
+        guard isRunning else { return }
+
+        if tapInstalled {
+            engine.inputNode.removeTap(onBus: 0)
+            tapInstalled = false
+        }
+        engine.stop()
+
+        do {
+            installTap()
+            engine.prepare()
+            try engine.start()
+            status = "Route changed; input restarted"
+            refreshRoute()
+        } catch {
+            errorText = error.localizedDescription
+            status = "Route change failed"
+            isRunning = false
+        }
     }
 
     private func refreshRoute() {

@@ -27,6 +27,22 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate
 
+      - name: Select an available iPhone simulator
+        id: simulator
+        run: |
+          DEVICE_ID=$(xcrun simctl list devices available | awk -F '[()]' '/iPhone/ {print $2; exit}')
+          test -n "$DEVICE_ID"
+          echo "device=$DEVICE_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Run unit tests
+        run: |
+          xcodebuild test \
+            -project SonicCarePro.xcodeproj \
+            -scheme SonicCarePro \
+            -destination "platform=iOS Simulator,id=${{ steps.simulator.outputs.device }}" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
+
       - name: Build unsigned device app
         run: |
           set +e
