@@ -20,8 +20,8 @@ targets:
       - path: Sources/SonicCarePro
         excludes:
           - Info.plist
-    resources:
       - path: Resources
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.soniccarepro.app
