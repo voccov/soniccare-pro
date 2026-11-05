@@ -14,7 +14,7 @@ PWA's unverified-report path and the native PiP/route-change conflicts.
 - Two independent reviews answered in `docs/REVIEW_RESPONSE.md`.
 - Plan revision `0.1.0-dev.4` pushed to `voccov/soniccare-pro`.
 - Deploy key authorized; remote pushed; tags `v0.1.0-dev`, `.2`, `.3`, `.3-pwa`,
-  `.3-pwa2`.
+  `.3-pwa2`, `.4`.
 - GitHub Pages source set to GitHub Actions; workflow write permission set.
 - Phase 0A PWA live at <https://voccov.github.io/soniccare-pro/>:
   - microphone capture with processing disabled;
@@ -38,8 +38,9 @@ PWA's unverified-report path and the native PiP/route-change conflicts.
   - microphone permission, HFP route, sample rate, live RMS;
   - 1 kHz tone, haptic tap, looping `PiPGuide.mp4` with PiP;
   - input restarts on a route change; PiP pauses the mic instead of fighting it;
-  - unsigned arm64 IPA, iOS 17+, 103 KB;
-  - GitHub Actions native build and unit tests successful; release tag `native-latest`;
+  - unsigned arm64 IPA, iOS 17+, 115 KB;
+  - CI run `42077740655`: unit tests 2m55s, device build 34s, IPA published;
+  - release tag `native-latest` updated with the audited build;
   - install page at <https://voccov.github.io/soniccare-pro/install.html>.
 - Audit fixes:
   - native `AudioMath` tests for RMS, level mapping, Bluetooth port and sample-rate label;
@@ -48,7 +49,8 @@ PWA's unverified-report path and the native PiP/route-change conflicts.
   - PWA locks the ear selector during a capture and flags phase/ear input changes;
   - demo mode uses two tones and reports `Demo only`, never a false ear diagnosis;
   - headless Chromium PWA run with a synthetic two-tone microphone passed:
-    scratch verified, both ears captured, JSON copied, report restored after reload.
+    scratch verified, both ears captured, JSON copied, report restored after reload;
+  - the live dev.4 page was re-tested; legacy captures migrate to the new input schema.
 
 ## Next actions
 
@@ -83,8 +85,8 @@ PWA's unverified-report path and the native PiP/route-change conflicts.
 - Data: left −8.1 dB SVR, right −0.95 dB SVR; left suspect; both mics live.
 - Scratch: left +37.0 dB delta / +18.2 dB ratio; right +28.3 dB delta / +10.4 dB ratio.
 - Plan/version checks pass for `0.1.0-dev.4`.
-- Native CI: unit tests on the Simulator plus an unsigned device IPA; a timeout guards the
-  test step.
+- Native CI: <https://github.com/voccov/soniccare-pro/actions/runs/42077740655> — unit
+  tests on the Simulator, unsigned device IPA, release asset 115,110 bytes.
 
 ## Do not forget
 
