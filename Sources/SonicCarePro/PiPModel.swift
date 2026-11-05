@@ -50,7 +50,7 @@ final class PiPModel: ObservableObject {
             return
         }
 
-        if !player.isPlaying {
+        if player.timeControlStatus != .playing {
             player.play()
         }
         controller.startPictureInPicture()
