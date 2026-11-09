@@ -9,7 +9,8 @@ One linear flow. Inline guidance. A visible skip on every optional step. No mode
 
 ```
 Start
-  → Readiness (case, ears, fit test, quiet room, volume)
+  → Choose a check (microphone / sound / optional fit)
+  → Readiness (case, ears, optional fit, quiet room, volume)
   → Connection (permission, route, sample rate)
   → Ear identity (left/right ping; swapped earbuds)
   → Side setup (left, then right; inline Settings visual; fingernail scratch)
@@ -54,6 +55,11 @@ Start
 - **Acoustic loopback is an experiment.** A tone or sweep played through the AirPods while
   the HFP microphone is active is tested in the PWA first. It becomes a feature only if
   the data shows a repeatable per-ear response; until then the voice SVR is the method.
+- **Test chooser:** the start screen offers the microphone check (most common), a sound
+  check (one earbud quiet or silent), and an optional fit guide. The microphone flow is
+  the only measurement. The sound check plays a real panned tone and asks where it was
+  heard; the fit guide is a user confirmation, not a measurement. The fit test is optional
+  and never blocks Continue.
 - **Interactive mockup:** `web/mockup.html`, published at
   <https://voccov.github.io/soniccare-pro/mockup.html> (example data; not a measurement).
 - **UX/UI blueprint:** `web/blueprint/`, published at
@@ -92,8 +98,9 @@ missing. The app never fills a gap with a guess.
 ### Readiness
 
 - Show the case → earbuds → ears sequence as a short vector animation.
-- Rows: `Both earbuds in`, `Ear Tip Fit Test` (Settings path and a good-seal confirmation),
-  `Quiet room`, `Volume low`.
+- Rows: `Both earbuds in`, `Ear Tip Fit Test` (optional; Settings path and a good-seal
+  confirmation), `Quiet room`, `Volume low`.
+- The fit row opens the optional guide and never blocks `Continue`.
 - Each row: icon, label, status, and one action. The app cannot sense in-ear status or run
   the fit test; it asks for a clear confirmation and explains why it matters.
 - Primary: `Continue` when ready.

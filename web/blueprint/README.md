@@ -7,6 +7,9 @@ the app. All values are example data.
 
 ## What to test
 
+- **Choose a check.** The ready screen and Studio offer the microphone check, the sound
+  check and the optional fit guide. The sound check plays a real panned tone; the fit guide
+  is optional and never blocks.
 - **Graphite / Porcelain.** Graphite is the product direction. Porcelain is a warm light
   exploration of the same system.
 - **System / Full / Reduced motion.** The default follows the system; the override is for
@@ -19,6 +22,10 @@ the app. All values are example data.
   and auto-play the walkthrough. Reload to replay; record the screen.
 
 ## Decisions the blueprint makes visible
+
+- The microphone check is the only measurement. The sound check tests drivers and stereo
+  routing; the fit guide is a user confirmation. The result says `Fit check: not checked`
+  when the optional fit test is skipped.
 
 - Both earbuds stay in. One microphone measures at a time; the inactive ear card says
   **Next**.

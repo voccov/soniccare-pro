@@ -61,6 +61,10 @@ PiP/route-change conflicts.
   - the published IPA re-verified: 115,110 bytes, arm64, iOS 17+, `PiPGuide.mp4`
     included, no app icon by design.
 - Phase 1 UX/UI blueprint built and live (2026-11-09), ready for review:
+  - test chooser: microphone check, sound check and optional fit;
+  - sound check uses a real panned tone; fit is optional and never blocks;
+  - scenario map in `docs/SCENARIOS.md` from public/community signals;
+  - new AirPods Pro earbud and ear SVGs, smoother live measurement, optional-fit copy;
   - <https://voccov.github.io/soniccare-pro/blueprint/>;
   - Graphite and Porcelain variants; System/Full/Reduced motion; happy, wrong-route and
     low-signal states; inline Settings + scratch; one microphone at a time;

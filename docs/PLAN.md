@@ -31,8 +31,9 @@ step: clean and retest, or stop and seek service.
   power during Phase B (“Ssss”, 3–6.5 kHz); `SVR = HF − LF`. HFP can be 8, 16 or 24 kHz;
   read the actual rate and set the band from Nyquist. No lab calibration, firmware,
   serial or battery claims.
-- One linear flow with inline guidance and visible skips. No Guide me / Quick test mode
-  toggle.
+- One linear flow per check with inline guidance and visible skips. A short start menu
+  offers the microphone check, a sound check and an optional fit guide. No Guide me /
+  Quick test mode toggle inside a check.
 - Categorical report plus measured dB delta. No 0–100 headline score.
 - PiP is Phase 2, not the MVP. The MVP shows the Settings path as an inline illustrated
   step; the bundled loop with `AVQueuePlayer` + `AVPlayerLooper` is the later guide. No
@@ -102,9 +103,13 @@ supported.
       detection.
 - [ ] Provisional categories: balanced, unilateral loss, bilateral loss, severely blocked;
       thresholds are starting hypotheses and are calibrated from Phase 0A data.
-- [ ] Guided flow: readiness, connection, ear identity, side setup, voice test, report,
-      recovery.
-- [ ] Readiness: case → ears, official Ear Tip Fit Test prompt, quiet-room check and a
+- [ ] Guided flow: test chooser, readiness, connection, ear identity, side setup, voice
+      test, report, recovery.
+- [ ] Sound check: a real, quiet 1 kHz tone panned left/right; the user reports where each
+      tone is heard. It checks drivers and stereo routing, not the microphone.
+- [ ] Optional fit guide: Apple's Ear Tip Fit Test path and tip sizes; it never blocks the
+      microphone check and the report says **Fit check: not checked** if skipped.
+- [ ] Readiness: case → ears, optional Ear Tip Fit Test prompt, quiet-room check and a
       volume-safety gate. Both earbuds stay in; the app never asks the user to remove one
       for the measurement.
 - [ ] Stereo ear-identity ping before capture: a left-only or right-only tone over A2DP,

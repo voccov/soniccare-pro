@@ -55,6 +55,7 @@ video. It uses example data, does not request the microphone and is not the app.
 - [Review response](docs/REVIEW_RESPONSE.md) — what changed after the independent critique.
 - [Review packet](docs/PLAN_FOR_REVIEW.md) — the full revision-2 plan and reviewer questions.
 - [Status](docs/STATUS.md) — current phase, next actions, blockers.
+- [Scenarios](docs/SCENARIOS.md) — common AirPods problems, the test that fits, and the limits.
 - [UX](docs/UX.md) — flow, guidance, skip rules, states.
 - [Copy](docs/COPY.md) — voice, banned patterns, screen copy.
 - [Setup](docs/SETUP.md) — GitHub and SideStore steps, with links.

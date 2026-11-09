@@ -71,12 +71,16 @@ medical device.
 - No App Store distribution in v1. Private APIs are avoided; PiP is a Phase 2
   enhancement for a bundled guide video behind a `PERSONAL_BUILD` flag. The MVP uses an
   inline illustrated Settings path.
-- One linear flow with inline guidance and visible skips. No Guide me / Quick test mode
-  toggle.
+- One linear flow per check, chosen from a short start menu: the microphone check
+  (primary measurement), a sound check (drivers and stereo), and an optional fit guide.
+  The fit guide never blocks; the microphone flow stays linear. No Guide me / Quick test
+  toggle inside a check.
 - Per-ear SVR plus a bilateral `Both high-frequency loss` category; left/right similarity
   alone cannot rule out two equally muffled ears.
 - Both earbuds stay in. The app measures one microphone at a time; the second ear card
-  says **Next** until the microphone is switched in Settings.
+  says **Next** until the microphone is switched in Settings. The sound check plays a
+  real, quiet 1 kHz tone panned left and right; it checks drivers and stereo routing, not
+  the microphone, and it is not a hearing test.
 - PiP uses a bundled looping MP4 with `AVQueuePlayer` + `AVPlayerLooper` in Phase 2.
 - Phase 0A PWA is a hard gate for the native MVP; native remains the craft build.
 - Categorical report plus measured dB delta. No 0–100 headline score.

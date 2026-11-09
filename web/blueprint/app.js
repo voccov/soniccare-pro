@@ -11,7 +11,7 @@
     { label: 'Result', note: 'A categorical verdict first, then the measured evidence.' },
     { label: 'Clean and retest', note: 'Clean only the suspect ear, dry for two hours, then compare.' }
   ];
-  const DOCK = ['4 checks', 'Route and rate', 'Playback only', 'Settings + scratch', 'One mic at a time', 'Measured evidence', '2-hour dry'];
+  const DOCK = ['3 checks + fit', 'Route and rate', 'Playback only', 'Settings + scratch', 'One mic at a time', 'Measured evidence', '2-hour dry'];
 
   const readPref = (key, fallback) => {
     try { return localStorage.getItem(key) || fallback; } catch { return fallback; }
@@ -34,9 +34,17 @@
   });
 
   let state = initialState();
+  const sound = { left: null, right: null, size: null, busy: false };
+  let soundCtx = null;
   let walkToken = 0;
   let accent = '#0A84FF';
+  let lineColor = 'rgba(255,255,255,.17)';
   let spectrumPct = 6;
+  let measureRAF = null;
+  let levelDisplay = 0;
+  let dbDisplay = -60;
+  let barsDisplay = new Array(30).fill(0.04);
+  let lastDbTime = 0;
   const timers = {
     count: null, listen: null, hold: null, confirm: null,
     ping: null, scratch: null, scratchEnd: null, save: null
@@ -116,7 +124,42 @@
     closeStudio: $('#closeStudio'),
     sheet: $('#studioSheet'),
     walkBanner: $('#walkBanner'),
-    walkFill: $('#walkFill')
+    walkFill: $('#walkFill'),
+    heroArt: $('#heroArt'),
+    replayHero: $('#replayHero'),
+    testSheet: $('#testSheet'),
+    testTitle: $('#testTitle'),
+    testBack: $('#testBack'),
+    closeTests: $('#closeTests'),
+    testViews: $$('.test-view'),
+    testPickerView: $('#testPickerView'),
+    soundView: $('#soundView'),
+    fitView: $('#fitView'),
+    soundProgress: $$('#soundProgress span'),
+    soundIntro: $('#soundIntro'),
+    soundLeftQ: $('#soundLeftQ'),
+    soundRightIntro: $('#soundRightIntro'),
+    soundRightQ: $('#soundRightQ'),
+    soundResult: $('#soundResult'),
+    soundLeftFeedback: $('#soundLeftFeedback'),
+    soundRightFeedback: $('#soundRightFeedback'),
+    soundVerdict: $('#soundVerdict'),
+    soundExplanation: $('#soundExplanation'),
+    soundLeftResult: $('#soundLeftResult'),
+    soundRightResult: $('#soundRightResult'),
+    soundWavesLeft: $('.sound-waves.left'),
+    soundWavesRight: $('.sound-waves.right'),
+    playLeftTone: $('#playLeftTone'),
+    playRightTone: $('#playRightTone'),
+    soundMic: $('#soundMic'),
+    soundDone: $('#soundDone'),
+    fitGood: $('#fitGood'),
+    fitLater: $('#fitLater'),
+    fitSizes: $$('[data-fit-size]'),
+    fitText: $('#fitText'),
+    resultFit: $('#resultFit'),
+    openTests: $('#openTests'),
+    openFit: $('#openFit')
   };
 
   const ctx = els.spectrum.getContext('2d');
@@ -130,9 +173,14 @@
     return value || '#0A84FF';
   }
 
+  function updateThemeColorCache() {
+    accent = accentColor();
+    lineColor = getComputedStyle(els.html).getPropertyValue('--line-strong').trim() || 'rgba(255,255,255,.17)';
+  }
+
   function canNext() {
     switch (state.step) {
-      case 0: return state.ready.skipped || ['inEars', 'fit', 'quiet', 'volume'].every(key => state.ready[key]);
+      case 0: return state.ready.skipped || ['inEars', 'quiet', 'volume'].every(key => state.ready[key]);
       case 1: return state.scenario !== 'route';
       case 2: return state.ear.choice === 'left' || state.ear.skipped;
       case 3: return state.mic.confirmed || state.mic.skipped;
@@ -156,8 +204,11 @@
   }
 
   function syncReady() {
-    $$('.check-item').forEach(b => b.setAttribute('aria-pressed', String(!!state.ready[b.dataset.check])));
+    $$('.check-item[data-check]').forEach(b => b.setAttribute('aria-pressed', String(!!state.ready[b.dataset.check])));
     els.setupSkipped.hidden = !state.ready.skipped;
+    els.fitText.textContent = state.ready.fit ? 'Good seal confirmed.' : 'Only if the fit feels loose. Apple\'s test is in Settings.';
+    els.fitText.classList.toggle('goodtext', state.ready.fit);
+    els.resultFit.textContent = state.ready.fit ? 'Fit check: Good seal.' : 'Fit check: not checked.';
   }
 
   function syncEar() {
@@ -210,11 +261,19 @@
     syncControls();
   }
 
+  function playHero() {
+    if (!els.heroArt) return;
+    els.heroArt.classList.remove('play');
+    void els.heroArt.offsetWidth;
+    els.heroArt.classList.add('play');
+  }
+
   function go(step, opts = {}) {
     const nextStep = clamp(step, 0, 6);
     if (state.step === 4 && nextStep !== 4) cancelMeasure();
     state.step = nextStep;
     sync();
+    if (nextStep === 0) playHero();
     if (nextStep === 1) renderRoute();
     if (nextStep === 4) renderMeasure();
     const scene = els.scene(nextStep);
@@ -239,7 +298,7 @@
     if (els.connectionLede) {
       els.connectionLede.textContent = bad
         ? 'iOS is using the iPhone microphone. Reconnect the AirPods to run the check.'
-        : 'iOS is using your AirPods. The input rate is reported by the audio engine.';
+        : 'Keep both earbuds in your ears. iOS has the AirPods microphone.';
     }
     els.routeWarning.hidden = !bad;
   }
@@ -287,13 +346,13 @@
       fb.textContent = 'Left earbud confirmed.';
     } else if (value === 'right') {
       fb.className = 'feedback warning';
-      fb.textContent = 'The earbuds are swapped. Swap them, then play the left ping again.';
+      fb.textContent = 'The earbuds are swapped. Take both out, swap left and right, put them back in, then play the left ping again.';
     } else if (value === 'both') {
       fb.className = 'feedback warning';
       fb.textContent = 'You heard it in both ears. Check the fit and connection, then try again.';
     } else {
       fb.className = 'feedback warning';
-      fb.textContent = 'No tone. Check the connection, then try again.';
+      fb.textContent = 'No tone. Check that both earbuds are in and connected, then try again.';
     }
     sync();
   }
@@ -367,20 +426,22 @@
     const n = 30;
     const gap = 2;
     const bw = (w - (n - 1) * gap) / n;
-    const base = clamp(pct, 2, 96);
     ctx.clearRect(0, 0, w, h);
     if (pct <= 8) {
-      ctx.fillStyle = getComputedStyle(els.html).getPropertyValue('--line-strong').trim() || 'rgba(255,255,255,.15)';
+      barsDisplay = barsDisplay.map(() => 0.04);
+      ctx.fillStyle = lineColor;
       ctx.globalAlpha = 0.8;
       ctx.fillRect(0, h - 1, w, 1);
       ctx.globalAlpha = 1;
       return;
     }
-    ctx.fillStyle = accentColor();
+    ctx.fillStyle = accent;
     ctx.globalAlpha = 0.82;
     for (let i = 0; i < n; i += 1) {
-      const wobble = low ? 0.2 : 0.5 + 0.5 * Math.abs(Math.sin(i * 0.9 + pct * 0.06));
-      const bh = Math.max(2, (base / 100) * h * (0.32 + wobble * 0.68) + (low ? 0 : Math.random() * 3));
+      const wobble = low ? 0.16 + Math.random() * 0.08 : 0.42 + 0.58 * Math.abs(Math.sin(i * 0.9 + pct * 0.06));
+      const target = low ? 0.045 + Math.random() * 0.02 : (clamp(pct, 2, 96) / 100) * (0.3 + wobble * 0.7) + Math.random() * 0.025;
+      barsDisplay[i] += (target - barsDisplay[i]) * 0.2;
+      const bh = Math.max(2, barsDisplay[i] * h);
       const x = i * (bw + gap);
       const y = h - bh;
       if (ctx.roundRect) {
@@ -412,6 +473,8 @@
   }
 
   function cancelMeasure() {
+    cancelAnimationFrame(measureRAF);
+    measureRAF = null;
     clearInterval(timers.count);
     clearInterval(timers.listen);
     clearTimeout(timers.hold);
@@ -469,7 +532,7 @@
       const side = m.side === 'left' ? 'LEFT' : 'RIGHT';
       els.phaseChip.textContent = `${side} · PHASE B · 3–6.5 kHz`;
       els.prompt.textContent = 'Say "Ssss" for three seconds';
-      els.hint.textContent = 'Hold a steady, comfortable voice. We listen to one microphone at a time.';
+      els.hint.textContent = 'Keep both earbuds in. Hold a steady, comfortable voice. We listen to one microphone at a time.';
       els.sideRead.textContent = `${side} · LF captured`;
       els.holdBtn.disabled = false;
       els.holdBtn.textContent = 'Start hold';
@@ -484,44 +547,47 @@
     const low = state.scenario === 'low';
     els.holdBtn.textContent = 'Listening…';
     els.ringLabel.textContent = 'LISTENING';
-    const start = Date.now();
-    clearInterval(timers.listen);
-    timers.listen = setInterval(() => {
-      const t = (Date.now() - start) / 3000;
-      let pct;
-      let db;
-      if (low) {
-        pct = 8 + Math.random() * 6;
-        db = -56 + Math.random() * 7;
-      } else {
-        pct = 50 + Math.sin(t * Math.PI * 4) * 9 + Math.random() * 6;
-        db = -23 + pct * 0.12;
+    const start = performance.now();
+    levelDisplay = 0;
+    dbDisplay = -60;
+    barsDisplay = barsDisplay.map(() => 0.04);
+    lastDbTime = 0;
+    cancelAnimationFrame(measureRAF);
+    const tick = (now) => {
+      const t = (now - start) / 1000;
+      const pct = low ? 9 + Math.sin(t * 2.4) * 2 + Math.random() * 2 : 52 + Math.sin(t * 2.2) * 8 + Math.random() * 5;
+      const db = low ? -55 + Math.random() * 3 : -23 + pct * 0.12;
+      levelDisplay += (pct - levelDisplay) * 0.16;
+      dbDisplay += (db - dbDisplay) * 0.16;
+      spectrumPct = levelDisplay;
+      setRing(levelDisplay);
+      drawSpectrum(levelDisplay, low);
+      if (now - lastDbTime > 100) {
+        setDb(dbDisplay.toFixed(1));
+        lastDbTime = now;
       }
-      spectrumPct = pct;
-      setRing(pct);
-      setDb(db.toFixed(1));
-      drawSpectrum(pct, low);
-    }, 90);
-    clearTimeout(timers.hold);
-    timers.hold = setTimeout(() => {
-      clearInterval(timers.listen);
-      timers.listen = null;
-      if (low) {
-        state.measure.busy = false;
-        els.holdBtn.disabled = false;
-        els.holdBtn.textContent = 'Start hold';
-        els.ringLabel.textContent = 'NO SIGNAL';
-        setRing(10);
-        spectrumPct = 8;
-        drawSpectrum(8, true);
-        setDb('−52.0');
-        els.measureError.hidden = false;
-        sync();
-        setTimeout(() => els.measureError.scrollIntoView({ block: 'nearest', behavior: isReduced() ? 'auto' : 'smooth' }), 40);
+      if (now - start >= 3000) {
+        measureRAF = null;
+        if (low) {
+          state.measure.busy = false;
+          els.holdBtn.disabled = false;
+          els.holdBtn.textContent = 'Start hold';
+          els.ringLabel.textContent = 'NO SIGNAL';
+          setRing(10);
+          spectrumPct = 8;
+          drawSpectrum(8, true);
+          setDb('−52.0');
+          els.measureError.hidden = false;
+          sync();
+          setTimeout(() => els.measureError.scrollIntoView({ block: 'nearest', behavior: isReduced() ? 'auto' : 'smooth' }), 40);
+          return;
+        }
+        capturePhase();
         return;
       }
-      capturePhase();
-    }, 3000);
+      measureRAF = requestAnimationFrame(tick);
+    };
+    measureRAF = requestAnimationFrame(tick);
   }
 
   function startHold() {
@@ -578,7 +644,7 @@
     const phase = m.phase;
     els.phaseChip.textContent = `${side} · ${phase === 0 ? 'PHASE A · 150–800 Hz' : 'PHASE B · 3–6.5 kHz'}`;
     els.prompt.textContent = phase === 0 ? 'Say "Ahhh" for three seconds' : 'Say "Ssss" for three seconds';
-    els.hint.textContent = 'Hold a steady, comfortable voice. We listen to one microphone at a time.';
+    els.hint.textContent = 'Keep both earbuds in. Hold a steady, comfortable voice. We listen to one microphone at a time.';
     els.sideRead.textContent = `${side} · ${phase === 1 ? 'LF captured' : '—'}`;
     if (m.side === 'left') setTiles('live', 'next');
     else setTiles('done', 'live');
@@ -648,7 +714,7 @@
     els.html.dataset.variant = value;
     document.body.classList.add('theme-anim');
     setTimeout(() => document.body.classList.remove('theme-anim'), 420);
-    accent = accentColor();
+    updateThemeColorCache();
     sync();
     if (state.step === 4) {
       setTimeout(() => { drawSpectrum(spectrumPct, state.scenario === 'low'); }, 380);
@@ -824,6 +890,159 @@
     if (els.sheet.open) els.sheet.close();
   }
 
+  function setTestView(view) {
+    const target = view === 'sound' ? els.soundView : view === 'fit' ? els.fitView : els.testPickerView;
+    els.testViews.forEach(v => { v.hidden = v !== target; });
+    els.testTitle.textContent = view === 'picker' ? 'Choose a check' : view === 'sound' ? 'Sound check' : 'Fit and seal';
+    els.testBack.hidden = view === 'picker';
+  }
+
+  function resetSound() {
+    sound.left = null;
+    sound.right = null;
+    sound.busy = false;
+    els.soundIntro.hidden = false;
+    els.soundLeftQ.hidden = true;
+    els.soundRightIntro.hidden = true;
+    els.soundRightQ.hidden = true;
+    els.soundResult.hidden = true;
+    els.soundLeftFeedback.textContent = '';
+    els.soundRightFeedback.textContent = '';
+    els.soundLeftResult.textContent = '—';
+    els.soundRightResult.textContent = '—';
+    els.playLeftTone.disabled = false;
+    els.playRightTone.disabled = false;
+    els.soundWavesLeft.classList.remove('tone');
+    els.soundWavesRight.classList.remove('tone');
+    setSoundProgress(0);
+  }
+
+  function setSoundProgress(step) {
+    els.soundProgress.forEach((seg, i) => {
+      seg.classList.toggle('active', i === Math.min(step, 2));
+      seg.classList.toggle('done', i < step);
+    });
+  }
+
+  function openTests(view = 'picker') {
+    if (els.sheet.open) els.sheet.close();
+    if (!els.testSheet.open) els.testSheet.showModal();
+    if (view === 'sound') resetSound();
+    setTestView(view);
+    els.closeTests.focus();
+  }
+
+  function closeTests() {
+    if (els.testSheet.open) els.testSheet.close();
+  }
+
+  function playTone(pan) {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return false;
+      if (!soundCtx) soundCtx = new AC();
+      soundCtx.resume();
+      const osc = soundCtx.createOscillator();
+      const gain = soundCtx.createGain();
+      const panner = soundCtx.createStereoPanner();
+      osc.type = 'sine';
+      osc.frequency.value = 1000;
+      panner.pan.value = pan;
+      const now = soundCtx.currentTime;
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.06, now + 0.03);
+      gain.gain.setValueAtTime(0.06, now + 0.55);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.72);
+      osc.connect(gain);
+      gain.connect(panner);
+      panner.connect(soundCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.75);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function playLeftTone() {
+    if (sound.busy) return;
+    sound.busy = true;
+    els.playLeftTone.disabled = true;
+    playTone(-1);
+    els.soundWavesLeft.classList.add('tone');
+    setTimeout(() => els.soundWavesLeft.classList.remove('tone'), 1000);
+    setTimeout(() => {
+      sound.busy = false;
+      els.soundIntro.hidden = true;
+      els.soundLeftQ.hidden = false;
+      setSoundProgress(1);
+    }, 850);
+  }
+
+  function playRightTone() {
+    if (sound.busy) return;
+    sound.busy = true;
+    els.playRightTone.disabled = true;
+    playTone(1);
+    els.soundWavesRight.classList.add('tone');
+    setTimeout(() => els.soundWavesRight.classList.remove('tone'), 1000);
+    setTimeout(() => {
+      sound.busy = false;
+      els.soundRightIntro.hidden = true;
+      els.soundRightQ.hidden = false;
+      setSoundProgress(2);
+    }, 850);
+  }
+
+  function renderSoundResult() {
+    const label = { left: 'Left', right: 'Right', both: 'Both', neither: 'Neither' };
+    els.soundLeftResult.textContent = label[sound.left] || '—';
+    els.soundRightResult.textContent = label[sound.right] || '—';
+    let verdict = 'Check the stereo channels';
+    let explanation = 'The tones did not match the expected ears. Check the volume and connection, then try again.';
+    if (sound.left === 'left' && sound.right === 'right') {
+      verdict = 'Both earbuds play';
+      explanation = 'You heard the left tone in the left ear and the right tone in the right ear. If sound is still muffled, run the microphone check or clean the mesh.';
+    } else if (sound.left === 'right' && sound.right === 'left') {
+      verdict = 'The earbuds are swapped';
+      explanation = 'The left tone was heard on the right and the right tone on the left. Take both out, swap left and right, put them back in, and run the sound check again.';
+    } else if (sound.left === 'neither' && sound.right === 'neither') {
+      verdict = 'No tone was heard';
+      explanation = 'Check the volume and the AirPods connection, then try the sound check again.';
+    } else if (sound.left === 'neither' || sound.right === 'neither') {
+      const side = sound.left === 'neither' ? 'left' : 'right';
+      verdict = `The ${side} earbud was not heard`;
+      explanation = `The ${side} earbud did not play its tone. Check that it is charged and connected. If it stays silent, clean the mesh or seek service.`;
+    } else if (sound.left === 'both' || sound.right === 'both') {
+      verdict = 'You heard both sides';
+      explanation = 'One tone reached both ears. Check the fit and the stereo balance, then try the sound check again.';
+    }
+    els.soundVerdict.textContent = verdict;
+    els.soundExplanation.textContent = explanation;
+    els.soundIntro.hidden = true;
+    els.soundLeftQ.hidden = true;
+    els.soundRightIntro.hidden = true;
+    els.soundRightQ.hidden = true;
+    els.soundResult.hidden = false;
+    setSoundProgress(3);
+  }
+
+  function chooseSound(side, value) {
+    if (side === 'left') {
+      sound.left = value;
+      els.soundLeftFeedback.className = 'feedback';
+      els.soundLeftFeedback.textContent = `Left tone: ${value === 'neither' ? 'not heard' : `heard on the ${value}`}.`;
+      els.soundLeftQ.hidden = true;
+      els.soundRightIntro.hidden = false;
+      setSoundProgress(2);
+      return;
+    }
+    sound.right = value;
+    els.soundRightFeedback.className = 'feedback';
+    els.soundRightFeedback.textContent = `Right tone: ${value === 'neither' ? 'not heard' : `heard on the ${value}`}.`;
+    renderSoundResult();
+  }
+
   /* Bind */
   els.chapters.forEach(button => button.addEventListener('click', () => {
     closeStudio();
@@ -846,7 +1065,38 @@
     else go(state.step + 1);
   });
 
-  $$('.check-item').forEach(b => b.addEventListener('click', () => toggleReady(b.dataset.check)));
+  $$('.check-item[data-check]').forEach(b => b.addEventListener('click', () => toggleReady(b.dataset.check)));
+  els.openTests.addEventListener('click', () => openTests('picker'));
+  els.openFit.addEventListener('click', () => openTests('fit'));
+  $$('[data-action="tests"]').forEach(b => b.addEventListener('click', () => { closeStudio(); openTests('picker'); }));
+  els.closeTests.addEventListener('click', closeTests);
+  els.testBack.addEventListener('click', () => setTestView('picker'));
+  els.testSheet.addEventListener('click', (event) => { if (event.target === els.testSheet) closeTests(); });
+  $$('[data-test]').forEach(b => b.addEventListener('click', () => {
+    const test = b.dataset.test;
+    if (test === 'mic') {
+      closeTests();
+      resetFlow();
+      go(0);
+    } else if (test === 'sound') {
+      openTests('sound');
+    } else {
+      openTests('fit');
+    }
+  }));
+  els.playLeftTone.addEventListener('click', playLeftTone);
+  els.playRightTone.addEventListener('click', playRightTone);
+  $$('[data-sound-left]').forEach(b => b.addEventListener('click', () => chooseSound('left', b.dataset.soundLeft)));
+  $$('[data-sound-right]').forEach(b => b.addEventListener('click', () => chooseSound('right', b.dataset.soundRight)));
+  els.soundMic.addEventListener('click', () => { closeTests(); resetFlow(); go(0); });
+  els.soundDone.addEventListener('click', closeTests);
+  els.fitSizes.forEach(b => b.addEventListener('click', () => {
+    sound.size = b.dataset.fitSize;
+    els.fitSizes.forEach(other => other.setAttribute('aria-pressed', String(other === b)));
+  }));
+  els.fitGood.addEventListener('click', () => { state.ready.fit = true; sync(); closeTests(); });
+  els.fitLater.addEventListener('click', closeTests);
+
   els.skipSetup.addEventListener('click', () => { els.skipSetupConfirm.hidden = false; });
   els.skipSetupYes.addEventListener('click', () => {
     state.ready.skipped = true;
@@ -854,6 +1104,7 @@
     sync();
   });
   els.skipSetupNo.addEventListener('click', () => { els.skipSetupConfirm.hidden = true; });
+  els.replayHero.addEventListener('click', playHero);
 
   els.reconnect.addEventListener('click', () => setScenario('happy'));
   els.playPing.addEventListener('click', playPing);
@@ -900,9 +1151,10 @@
 
   const filmMode = new URLSearchParams(location.search).has('film');
   if (filmMode) document.body.classList.add('film');
-  accent = accentColor();
+  updateThemeColorCache();
   sync();
   renderRoute();
   renderMeasure();
+  playHero();
   if (filmMode) setTimeout(() => playWalkthrough(), 800);
 })();

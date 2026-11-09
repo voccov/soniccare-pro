@@ -179,3 +179,20 @@ scratch-verified, and PiP is Phase 2.
 
 The blueprint is code-native (HTML/CSS/SVG/Canvas/Web Animations) with no runtime
 dependency. The native build reuses the interaction model, not the code.
+
+## ADR-015 — Multiple checks and an optional fit guide
+
+**Status:** accepted, 2026-11-09.
+
+The app starts with a short test chooser: the **microphone check** (the primary
+measurement), a **sound check** (a real, quiet 1 kHz tone panned left and right; drivers
+and stereo routing), and an optional **fit guide** (Apple's Ear Tip Fit Test and tip
+sizes). The microphone flow stays linear.
+
+The fit test no longer blocks Continue. The result says `Fit check: not checked` when it
+is skipped. The sound check is playback-only and never claims a hearing test. The fit guide
+is a user confirmation, not a measurement. The microphone SVR remains the only
+high-frequency measurement.
+
+This revises the “one linear flow” decision without adding a Guide me / Quick test toggle
+inside a check.

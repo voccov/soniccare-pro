@@ -7,6 +7,12 @@ semver.
 
 ### Added
 
+- Blueprint test chooser: microphone check, sound check with a real panned tone, and an
+  optional fit guide that never blocks the microphone check.
+- `docs/SCENARIOS.md`: a community-signal map of common AirPods problems, the checks that
+  can address them, and what the app cannot test.
+- New AirPods Pro earbud and side-ear SVGs; a stem close-up for the scratch check; a
+  case/left-earbud/removed-tip cleaning illustration; smoother live measurement motion.
 - Phase 1 interactive UX/UI blueprint at `web/blueprint/`: Graphite and Porcelain
   variants, System/Full/Reduced motion, happy/route/low-signal states, inline Settings
   and scratch, one-microphone-at-a-time measurement, a 36-second walkthrough and an MP4
