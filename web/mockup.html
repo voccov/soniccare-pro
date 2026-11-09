@@ -31,6 +31,7 @@
   .icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .stage { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: max(16px, env(safe-area-inset-top)) 8px max(16px, env(safe-area-inset-bottom)); }
   .caption { margin: 0; color: var(--app-tertiary); font-size: 11px; letter-spacing: .02em; }
+  .caption a { color: var(--app-accent); text-decoration: none; }
   .phone {
     position: relative; width: min(390px, 100%); height: 760px;
     background: var(--app-bg); color: var(--app-text);
@@ -574,7 +575,7 @@
       <button id="next" class="primary" disabled>Continue</button>
     </div>
   </div>
-  <p class="caption">Interactive mockup · example data · not a measurement</p>
+  <p class="caption">Interactive mockup · example data · not a measurement · <a href="./blueprint/">UX blueprint</a></p>
 </div>
 
 <script>

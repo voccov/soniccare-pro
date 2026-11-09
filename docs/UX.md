@@ -56,7 +56,10 @@ Start
   the data shows a repeatable per-ear response; until then the voice SVR is the method.
 - **Interactive mockup:** `web/mockup.html`, published at
   <https://voccov.github.io/soniccare-pro/mockup.html> (example data; not a measurement).
-  Use it to review the flow and motion before native work.
+- **UX/UI blueprint:** `web/blueprint/`, published at
+  <https://voccov.github.io/soniccare-pro/blueprint/>. The primary design proof: Graphite
+  and Porcelain variants, System/Full/Reduced motion, happy/route/low-signal states, and
+  a 36-second walkthrough video. Example data; not the app.
 
 ## Skip matrix
 

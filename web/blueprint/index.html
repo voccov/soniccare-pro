@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en" data-variant="graphite" data-motion="system">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#070709">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <title>SonicCare Pro — UX blueprint</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-chev-l" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h9M17 18h3"/><circle cx="15" cy="6" r="2"/><circle cx="7" cy="12" r="2"/><circle cx="15" cy="18" r="2"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="m7 4 13 8-13 8V4z"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9"/></symbol>
+  <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5zM15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/></symbol>
+</svg>
+
+<div class="studio">
+  <aside class="rail" aria-label="Blueprint controls">
+    <div class="rail-brand"><span class="brand-dot"></span><span class="wordmark">SonicCare</span><span class="rail-tag">Blueprint</span></div>
+    <p class="rail-lede">A guided AirPods check. Use this build to test the flow, motion and error states before native work.</p>
+
+    <button class="primary rail-play" data-action="walkthrough"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg><span>Play walkthrough</span><span class="mono">36s</span></button>
+    <button class="text-link rail-reset" data-action="reset">Reset flow</button>
+
+    <nav class="chapters" aria-label="Flow steps">
+      <button class="chapter" data-step-choice="0" aria-pressed="true"><span class="chapter-num">01</span><span>Ready</span></button>
+      <button class="chapter" data-step-choice="1" aria-pressed="false"><span class="chapter-num">02</span><span>Connection</span></button>
+      <button class="chapter" data-step-choice="2" aria-pressed="false"><span class="chapter-num">03</span><span>Ear check</span></button>
+      <button class="chapter" data-step-choice="3" aria-pressed="false"><span class="chapter-num">04</span><span>Microphone</span></button>
+      <button class="chapter" data-step-choice="4" aria-pressed="false"><span class="chapter-num">05</span><span>Measure</span></button>
+      <button class="chapter" data-step-choice="5" aria-pressed="false"><span class="chapter-num">06</span><span>Result</span></button>
+      <button class="chapter" data-step-choice="6" aria-pressed="false"><span class="chapter-num">07</span><span>Clean and retest</span></button>
+    </nav>
+
+    <div class="rail-note"><span class="micro">Now</span><p id="railNote">Fit, seal, volume and a quiet room are confirmed before any measurement.</p></div>
+
+    <div class="control-group">
+      <div class="control-head"><span class="micro">Variant</span></div>
+      <div class="seg" role="group" aria-label="Variant">
+        <button data-variant-choice="graphite" aria-pressed="true">Graphite</button>
+        <button data-variant-choice="porcelain" aria-pressed="false">Porcelain</button>
+      </div>
+      <p class="control-note">Graphite is the product direction. Porcelain is an exploration.</p>
+    </div>
+
+    <div class="control-group">
+      <div class="control-head"><span class="micro">Motion</span></div>
+      <div class="seg" role="group" aria-label="Motion">
+        <button data-motion-choice="system" aria-pressed="true">System</button>
+        <button data-motion-choice="full" aria-pressed="false">Full</button>
+        <button data-motion-choice="reduced" aria-pressed="false">Reduced</button>
+      </div>
+      <p class="control-note">Default follows the system. The override is for testing.</p>
+    </div>
+
+    <div class="control-group">
+      <label class="control-head" for="simulateRail"><span class="micro">Simulate</span></label>
+      <div class="select-wrap">
+        <select id="simulateRail" data-simulate>
+          <option value="happy">Happy path</option>
+          <option value="route">Wrong route</option>
+          <option value="low">Low signal</option>
+        </select>
+        <svg class="icon chev" aria-hidden="true"><use href="#i-chev-r"/></svg>
+      </div>
+      <p class="control-note">Switch the route warning or the low-signal error.</p>
+    </div>
+
+    <div class="rail-links">
+      <a class="rail-link" href="../mockup.html" target="_blank" rel="noopener"><span>Phase 1 mockup</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a class="rail-link" href="../" target="_blank" rel="noopener"><span>Live PWA</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a class="rail-link" href="./walkthrough.mp4" target="_blank" rel="noopener"><span>Walkthrough video</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    </div>
+
+    <p class="rail-foot">Example data · not a measurement.<br>Blueprint, not the app.</p>
+  </aside>
+
+  <main class="device-stage">
+    <div class="device" id="device">
+      <div class="device-status" aria-hidden="true">
+        <span>9:41</span>
+        <span class="device-icons">
+          <svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+          <svg viewBox="0 0 18 12"><path d="M1 5.5a12 12 0 0 1 16 0M4 8a7.5 7.5 0 0 1 10 0M7 10.5a3 3 0 0 1 4 0"/></svg>
+          <svg viewBox="0 0 24 12"><rect x="1" y="2" width="19" height="8" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="3" y="4" width="12" height="4" rx="1"/><rect x="21" y="4.5" width="2" height="3" rx="1"/></svg>
+        </span>
+      </div>
+      <div class="device-island" aria-hidden="true"></div>
+
+      <div class="app" id="app">
+        <header class="appbar">
+          <div class="app-brand"><span class="brand-dot"></span><span class="wordmark">SonicCare</span></div>
+          <span class="app-step mono" id="appStep">1 / 7</span>
+          <button class="studio-launch" id="openStudio" aria-label="Open studio controls"><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg></button>
+        </header>
+        <div class="progress" id="progress" aria-hidden="true">
+          <span class="seg active"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span>
+        </div>
+
+        <main class="scenes" id="scenes">
+          <!-- 1 READY -->
+          <section class="scene active" data-step="0" aria-labelledby="h0">
+            <div class="scene-head">
+              <h1 id="h0" tabindex="-1">Check your AirPods</h1>
+              <p class="lede">A guided check for muffled or uneven sound. We test each earbud and show you what we found.</p>
+            </div>
+            <div class="hero-art" id="heroArt" aria-hidden="true">
+              <svg viewBox="0 0 340 190">
+                <rect class="hero-case" x="18" y="108" width="96" height="44" rx="14"/>
+                <rect class="hero-lid" x="18" y="94" width="96" height="16" rx="8"/>
+                <circle class="hero-led" cx="66" cy="130" r="3"/>
+                <g class="hero-bud hero-bud-l"><ellipse cx="50" cy="100" rx="12" ry="15"/><rect x="45" y="110" width="10" height="24" rx="5"/><circle class="hero-ring" cx="50" cy="130" r="3.5"/></g>
+                <g class="hero-bud hero-bud-r"><ellipse cx="84" cy="100" rx="12" ry="15"/><rect x="79" y="110" width="10" height="24" rx="5"/><circle class="hero-ring" cx="84" cy="130" r="3.5"/></g>
+                <path class="hero-flow" d="M126 130c26 2 42-8 54-20"/>
+                <path class="hero-flowhead" d="m172 104 9 5-5 9"/>
+                <path class="hero-ear" d="M252 50c-36 0-56 30-50 66 4 24 18 42 38 50 10 2 18-1 23-8"/>
+                <path class="hero-ear-inner" d="M250 76c-20 0-30 18-26 38 3 14 11 24 22 28"/>
+                <g class="hero-bud hero-bud-ear"><ellipse cx="236" cy="100" rx="9" ry="12"/><rect x="231.5" y="110" width="9" height="22" rx="4.5"/></g>
+                <g class="hero-waves"><path d="M198 98c-7 5-11 13-11 21s4 16 11 21"/><path d="M189 88c-11 8-17 19-17 31s6 23 17 31"/></g>
+              </svg>
+            </div>
+
+            <ul class="checklist">
+              <li><button class="check-item" data-check="inEars" aria-pressed="false"><span class="check-box"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="check-copy"><strong>Both earbuds in</strong><em>Take them out of the case and put them in.</em></span></button></li>
+              <li><button class="check-item" data-check="fit" aria-pressed="false"><span class="check-box"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="check-copy"><strong>Ear Tip Fit Test</strong><em>Settings → Bluetooth → (i) → Ear Tip Fit Test.</em></span></button></li>
+              <li><button class="check-item" data-check="quiet" aria-pressed="false"><span class="check-box"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="check-copy"><strong>Quiet room</strong><em>No fans, traffic or TV.</em></span></button></li>
+              <li><button class="check-item" data-check="volume" aria-pressed="false"><span class="check-box"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="check-copy"><strong>Volume low</strong><em>Start at one or two bars. You can raise it later.</em></span></button></li>
+            </ul>
+
+            <div class="skip-line"><button class="text-link" id="skipSetup">Skip setup</button><span class="chip subtle" id="setupSkipped" hidden>Not tested</span></div>
+            <div class="inline-confirm" id="skipSetupConfirm" hidden>
+              <p>Skip setup? The result will say <strong>Not tested</strong> for the missing checks.</p>
+              <div class="inline-actions"><button id="skipSetupYes" class="secondary">Skip</button><button id="skipSetupNo" class="text-link">Keep going</button></div>
+            </div>
+
+            <details class="why"><summary>Why the fit test matters<svg class="icon chev" aria-hidden="true"><use href="#i-chev-r"/></svg></summary><p>A loose tip can look like high-frequency loss. Run Apple's Ear Tip Fit Test first, then confirm the seal here.</p></details>
+            <p class="fine">The app cannot sense whether the earbuds are in. You confirm each step; skipped steps show as Not tested.</p>
+          </section>
+
+          <!-- 2 CONNECTION -->
+          <section class="scene" data-step="1" aria-labelledby="h1">
+            <div class="scene-head">
+              <h1 id="h1" tabindex="-1">Connection</h1>
+              <p class="lede" id="connectionLede">iOS is using your AirPods. The input rate is reported by the audio engine.</p>
+            </div>
+            <div class="signal-art" aria-hidden="true">
+              <svg viewBox="0 0 340 86">
+                <rect x="14" y="22" width="38" height="52" rx="8"/>
+                <rect x="22" y="30" width="22" height="34" rx="3"/>
+                <path d="M66 48h74" class="signal-line"/>
+                <path d="M126 34c10 7 16 12 16 14s-6 7-16 14" class="signal-bt"/>
+                <path d="M150 48h48" class="signal-line"/>
+                <ellipse cx="272" cy="42" rx="16" ry="19"/>
+                <rect x="264" y="56" width="16" height="16" rx="8"/>
+                <circle cx="272" cy="56" r="3" class="signal-ring"/>
+                <circle class="signal-dot" r="3"></circle>
+              </svg>
+            </div>
+
+            <div class="route-panel" id="routePanel">
+              <div class="route-top"><span class="status-dot good" id="routeDot"></span><span id="routeTitle">AirPods Pro · Connected</span><span class="chip good" id="routeChip">HFP</span></div>
+              <dl class="specs">
+                <div><dt>Microphone access</dt><dd class="goodtext" id="routePerm">Granted</dd></div>
+                <div><dt>Route</dt><dd id="routeName">Bluetooth HFP</dd></div>
+                <div><dt>Input rate</dt><dd class="mono" id="routeRate">48 kHz</dd></div>
+                <div><dt>Device</dt><dd id="routeDevice">AirPods Pro</dd></div>
+              </dl>
+            </div>
+
+            <div class="warning-panel" id="routeWarning" hidden>
+              <strong>iOS is using the iPhone microphone</strong>
+              <p>Reconnect the AirPods, then try again. The check needs the AirPods microphone.</p>
+              <button id="reconnect" class="secondary">Reconnect AirPods</button>
+            </div>
+
+            <details class="why"><summary>Why 48 kHz is not the whole story<svg class="icon chev" aria-hidden="true"><use href="#i-chev-r"/></svg></summary><p>The engine can report 48 kHz while the Bluetooth speech link is narrower. The app checks the usable high band from the signal itself, not from this number alone.</p></details>
+            <p class="fine">If the route is Built-in Mic, reconnect the AirPods, then return here.</p>
+          </section>
+
+          <!-- 3 EAR CHECK -->
+          <section class="scene" data-step="2" aria-labelledby="h2">
+            <div class="scene-head">
+              <h1 id="h2" tabindex="-1">Which ear?</h1>
+              <p class="lede">We play a short ping in one earbud before the microphone starts. This catches swapped earbuds.</p>
+            </div>
+            <div class="ear-stage" id="earStage" aria-hidden="true">
+              <svg viewBox="0 0 340 220">
+                <path class="ear-neck" d="M126 198c16-24 32-36 44-36s28 12 44 36"/>
+                <path class="ear-head" d="M170 28c-52 0-86 34-86 78 0 36 22 64 50 78h72c28-14 50-42 50-78 0-44-34-78-86-78Z"/>
+                <path class="ear-outline left" d="M92 104c-16 0-25 12-25 28 0 18 9 31 25 35"/>
+                <path class="ear-outline" d="M248 104c16 0 25 12 25 28 0 18-9 31-25 35"/>
+                <g class="ear-bud"><ellipse cx="92" cy="118" rx="12" ry="15"/><rect x="86.5" y="129" width="11" height="26" rx="5.5"/></g>
+                <g class="ear-rings"><circle cx="71" cy="134" r="20"/><circle cx="61" cy="134" r="34"/><circle cx="51" cy="134" r="48"/></g>
+              </svg>
+              <span class="ear-label left">Left</span><span class="ear-label right">Right</span>
+            </div>
+            <button id="playPing" class="secondary wide"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> Play left ping</button>
+            <div class="choices" id="earChoices" hidden role="group" aria-label="Where did you hear the ping?">
+              <button data-ear="left" aria-pressed="false">Left</button>
+              <button data-ear="right" aria-pressed="false">Right</button>
+              <button data-ear="both" aria-pressed="false">Both</button>
+              <button data-ear="neither" aria-pressed="false">Neither</button>
+            </div>
+            <div class="feedback" id="earFeedback" role="status" aria-live="polite"></div>
+            <button class="text-link" id="skipEar">Skip ear check</button>
+            <p class="fine">No microphone is used on this step. The ping never becomes a per-ear result.</p>
+          </section>
+
+          <!-- 4 MICROPHONE -->
+          <section class="scene" data-step="3" aria-labelledby="h3">
+            <div class="scene-head">
+              <h1 id="h3" tabindex="-1">Set the microphone to Left</h1>
+              <p class="lede">Open Settings, tap your AirPods, then Microphone, then Always Left.</p>
+            </div>
+            <div class="path-panel" id="pathPanel">
+              <ol class="path">
+                <li><span class="path-num">1</span><span><strong>Settings</strong><em>Open the iPhone Settings app.</em></span></li>
+                <li><span class="path-num">2</span><span><strong>Bluetooth</strong><em>Tap the (i) next to your AirPods.</em></span></li>
+                <li><span class="path-num">3</span><span><strong>Microphone</strong><em>Choose Always Left.</em></span></li>
+              </ol>
+              <button id="pathDone" class="secondary wide">I've set it to Left</button>
+            </div>
+
+            <div class="scratch-panel" id="scratchPanel" hidden>
+              <div class="panel-head"><h2>Confirm the microphone</h2><span class="chip">Scratch</span></div>
+              <div class="scratch-stage" id="scratchStage" aria-hidden="true">
+                <svg viewBox="0 0 300 150">
+                  <g class="scratch-bud"><ellipse cx="112" cy="48" rx="28" ry="34"/><rect x="100" y="68" width="24" height="52" rx="12"/><circle class="scratch-ring" cx="112" cy="112" r="8"/></g>
+                  <path class="scratch-nail" d="M186 58c10 5 15 15 12 25-2 9-10 15-20 14"/>
+                  <path class="scratch-path" d="M136 114c18-9 34-9 52 0"/>
+                </svg>
+              </div>
+              <p class="lede small">Lightly scratch the bottom silver ring with a fingernail for one second. Do not tap the stem.</p>
+              <div class="mini-wave" id="miniWave" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+              <button id="scratchBtn" class="secondary wide">Start scratch check</button>
+              <div class="feedback" id="scratchFeedback" role="status" aria-live="polite"></div>
+            </div>
+
+            <button class="text-link" id="skipMic">Skip side check</button>
+            <p class="fine">Bluetooth sends one microphone at a time. This confirms the left microphone; we test the right after.</p>
+          </section>
+
+          <!-- 5 MEASURE -->
+          <section class="scene measure-scene" data-step="4" aria-labelledby="h4">
+            <div class="measure-top">
+              <div class="ear-tiles">
+                <div class="ear-tile active" id="leftTile"><span class="micro">Left mic</span><strong>Live</strong></div>
+                <div class="ear-tile" id="rightTile"><span class="micro">Right mic</span><strong>Next</strong></div>
+              </div>
+              <span class="chip subtle" id="simChip">Simulated</span>
+            </div>
+
+            <div class="instrument" id="instrument">
+              <div class="ring-wrap">
+                <svg class="level-ring" viewBox="0 0 260 260" aria-hidden="true">
+                  <circle class="ring-track" cx="130" cy="130" r="100"/>
+                  <circle class="ring-target" cx="130" cy="130" r="100" transform="rotate(-90 130 130)"/>
+                  <circle class="ring-live" cx="130" cy="130" r="100" transform="rotate(-90 130 130)"/>
+                </svg>
+                <div class="ring-center"><span id="dbValue">—</span><span class="unit">dB</span><span class="ring-label" id="ringLabel">READY</span></div>
+              </div>
+              <canvas id="spectrum" aria-label="Simulated live spectrum" role="img"></canvas>
+              <div class="phase-chip" id="phaseChip">LEFT · PHASE A · 150–800 Hz</div>
+              <h2 id="prompt">Say "Ahhh" for three seconds</h2>
+              <p class="lede small" id="hint">Hold a steady, comfortable voice. We listen to one microphone at a time.</p>
+              <button id="holdBtn" class="primary wide">Start hold</button>
+              <button id="seeResult" class="primary wide" hidden>See result</button>
+              <div class="measure-error" id="measureError" role="status" aria-live="polite" hidden>
+                <strong>We didn't hear enough</strong>
+                <p>Move the phone closer or try again in a quieter room.</p>
+                <div class="inline-actions"><button id="retryHold" class="secondary">Try again</button><button id="goodSignal" class="text-link">Simulate good signal</button></div>
+              </div>
+              <div class="measure-foot"><span>Both earbuds stay in.</span><span class="mono" id="sideRead">LEFT · —</span></div>
+            </div>
+
+            <div class="switch-panel" id="switchPanel" hidden>
+              <div class="switch-summary"><span class="status-dot good"></span><span>Left ear captured</span><span class="chip good">−19.1 dB</span></div>
+              <h2>Now the right ear</h2>
+              <p class="lede small">Switch the microphone to Right in Settings, then confirm the right ear.</p>
+              <p class="path-hint mono">Settings → Bluetooth → (i) → Microphone → Always Right</p>
+              <button id="confirmRight" class="primary wide">Confirm right microphone</button>
+              <div class="feedback" id="rightFeedback" role="status" aria-live="polite"></div>
+            </div>
+          </section>
+
+          <!-- 6 RESULT -->
+          <section class="scene" data-step="5" aria-labelledby="h5">
+            <div class="scene-head">
+              <span class="chip warn" id="resultChip">Example result</span>
+              <h1 id="h5" tabindex="-1">Right microphone has high-frequency loss</h1>
+              <p class="lede">The right microphone loses 12.4 dB in the high frequencies (3–6.5 kHz). This can happen when the mesh is blocked.</p>
+            </div>
+
+            <div class="ear-results">
+              <article class="ear-result">
+                <div class="ear-result-head"><span class="micro">Left</span><span class="chip good">Balanced</span></div>
+                <div class="svr">−1.2 <span>dB SVR</span></div>
+                <div class="confidence">Confidence: High</div>
+                <div class="range" aria-hidden="true"><span class="range-dot" style="--v: 94%"></span></div>
+                <div class="range-scale"><span>−20</span><span>0 dB</span></div>
+              </article>
+              <article class="ear-result suspect">
+                <div class="ear-result-head"><span class="micro">Right</span><span class="chip warn">High-frequency loss</span></div>
+                <div class="svr">−12.4 <span>dB SVR</span></div>
+                <div class="confidence">Confidence: Medium</div>
+                <div class="range" aria-hidden="true"><span class="range-dot" style="--v: 38%"></span></div>
+                <div class="range-scale"><span>−20</span><span>0 dB</span></div>
+              </article>
+            </div>
+
+            <figure class="chart">
+              <figcaption><span class="micro">Spectral difference</span><span class="micro">Example</span></figcaption>
+              <svg viewBox="0 0 320 120" aria-hidden="true">
+                <rect x="188" y="8" width="94" height="92" class="chart-band"/>
+                <path d="M22 16v88M22 104h278" class="chart-axis"/>
+                <path d="M22 60h278" class="chart-grid"/>
+                <path d="M188 16v88M282 16v88" class="chart-band-edge"/>
+                <path d="M22 52c26-4 48-6 72-3s44 5 68 2 42-3 60 0 34 3 52 2" class="chart-line good"/>
+                <path d="M22 54c26-1 48 0 72 3s44 6 68 9 42 10 60 18 34 14 52 20" class="chart-line warn"/>
+              </svg>
+              <div class="chart-legend"><span><i class="dot good"></i>Left</span><span><i class="dot warn"></i>Right</span></div>
+            </figure>
+
+            <details class="why"><summary>What SVR means<svg class="icon chev" aria-hidden="true"><use href="#i-chev-r"/></svg></summary><p>SVR compares the high-frequency "Ssss" band (3–6.5 kHz) with the low-frequency "Ahhh" band (150–800 Hz). A lower value means less high-frequency energy in that microphone.</p></details>
+            <details class="why"><summary>What we measured<svg class="icon chev" aria-hidden="true"><use href="#i-chev-r"/></svg></summary><p>Left and right SVR, the high-frequency difference, and the active input route. These are example values for this blueprint.</p></details>
+            <details class="why"><summary>What we didn't measure<svg class="icon chev" aria-hidden="true"><use href="#i-chev-r"/></svg></summary><p>Absolute sound pressure, firmware, serial, battery, or a hardware fault. This is a check, not a diagnosis.</p></details>
+
+            <div class="result-actions"><button id="testAgain" class="text-link">Test again</button><button id="saveResult" class="text-link">Save result</button></div>
+            <p class="feedback success" id="saveNote" hidden>Saved on this iPhone.</p>
+          </section>
+
+          <!-- 7 RECOVERY -->
+          <section class="scene" data-step="6" aria-labelledby="h6">
+            <div class="scene-head"><h1 id="h6" tabindex="-1">Clean the right mesh</h1></div>
+            <div class="safety-panel">Use Apple's method: micellar water and a soft children's toothbrush. No liquids in the openings, no compressed air, no sharp tools.</div>
+            <div class="clean-art" id="cleanArt" aria-hidden="true">
+              <svg viewBox="0 0 340 124">
+                <path class="clean-table" d="M24 106h292"/>
+                <g class="clean-bud">
+                  <ellipse cx="140" cy="62" rx="34" ry="27"/>
+                  <rect x="126" y="76" width="28" height="32" rx="14"/>
+                  <ellipse class="clean-mesh" cx="140" cy="54" rx="15" ry="9"/>
+                  <circle class="clean-meshdot" cx="132" cy="52" r="1.4"/>
+                  <circle class="clean-meshdot" cx="140" cy="50" r="1.4"/>
+                  <circle class="clean-meshdot" cx="148" cy="52" r="1.4"/>
+                </g>
+                <g class="clean-brush">
+                  <rect x="234" y="26" width="14" height="58" rx="7" transform="rotate(9 241 55)"/>
+                  <path d="M226 88h30M228 94h26M230 100h22"/>
+                </g>
+              </svg>
+            </div>
+            <ol class="path steps">
+              <li><span class="path-num">1</span><span><strong>Take the right earbud out</strong><em>Place it mesh-down on a clean table.</em></span></li>
+              <li><span class="path-num">2</span><span><strong>Brush the mesh</strong><em>Micellar water on a soft children's toothbrush. Light strokes only.</em></span></li>
+              <li><span class="path-num">3</span><span><strong>Dry for two hours</strong><em>Leave it out of the case, mesh-down, in a dry room.</em></span></li>
+              <li><span class="path-num">4</span><span><strong>Test again</strong><em>Compare the same ear with the baseline.</em></span></li>
+            </ol>
+            <div class="timer-panel" id="timerPanel">
+              <div class="timer-head"><span class="micro">Dry timer</span><span class="mono" id="timerValue">2:00:00</span></div>
+              <div class="timer-rail"><span id="timerFill"></span></div>
+              <button id="startTimer" class="secondary wide">Start 2-hour timer</button>
+              <button id="demoUnlock" class="text-link" hidden>Demo: unlock test now</button>
+              <button id="retest" class="secondary wide" hidden>Test again</button>
+            </div>
+            <p class="fine">Do not put the earbud back in until it is completely dry. No tone is played during cleaning.</p>
+            <div class="finish-panel" id="finish" hidden><strong>Done.</strong><p>Your result stays on this iPhone.</p><button id="startOver" class="text-link">Start over</button></div>
+          </section>
+        </main>
+
+        <footer class="dock">
+          <button id="back" class="text-link dock-back" disabled><svg class="icon" aria-hidden="true"><use href="#i-chev-l"/></svg> Back</button>
+          <span class="dock-note" id="dockNote">4 checks</span>
+          <button id="next" class="primary dock-next" disabled>Continue</button>
+        </footer>
+
+        <button class="walk-banner" id="walkBanner" hidden aria-label="Stop the walkthrough">
+          <span class="walk-dot"></span><span>Playing walkthrough</span><span class="walk-hint">Tap to stop</span><span class="walk-fill" id="walkFill"></span>
+        </button>
+      </div>
+      <div class="device-home" aria-hidden="true"></div>
+    </div>
+    <p class="stage-caption">Example data · not a measurement. The blueprint is not the app.</p>
+  </main>
+</div>
+
+<dialog id="studioSheet" class="studio-sheet" aria-labelledby="sheetTitle">
+  <div class="sheet-grab" aria-hidden="true"></div>
+  <div class="sheet-head"><h2 id="sheetTitle">Studio</h2><button id="closeStudio" class="icon-btn" aria-label="Close studio"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
+  <div class="sheet-body">
+    <div class="sheet-chapters" aria-label="Jump to a step">
+      <button class="chapter" data-step-choice="0" aria-pressed="true"><span class="chapter-num">01</span><span>Ready</span></button>
+      <button class="chapter" data-step-choice="1" aria-pressed="false"><span class="chapter-num">02</span><span>Connection</span></button>
+      <button class="chapter" data-step-choice="2" aria-pressed="false"><span class="chapter-num">03</span><span>Ear check</span></button>
+      <button class="chapter" data-step-choice="3" aria-pressed="false"><span class="chapter-num">04</span><span>Microphone</span></button>
+      <button class="chapter" data-step-choice="4" aria-pressed="false"><span class="chapter-num">05</span><span>Measure</span></button>
+      <button class="chapter" data-step-choice="5" aria-pressed="false"><span class="chapter-num">06</span><span>Result</span></button>
+      <button class="chapter" data-step-choice="6" aria-pressed="false"><span class="chapter-num">07</span><span>Clean and retest</span></button>
+    </div>
+
+    <div class="control-group">
+      <div class="control-head"><span class="micro">Variant</span></div>
+      <div class="seg" role="group" aria-label="Variant">
+        <button data-variant-choice="graphite" aria-pressed="true">Graphite</button>
+        <button data-variant-choice="porcelain" aria-pressed="false">Porcelain</button>
+      </div>
+      <p class="control-note">Graphite is the product direction. Porcelain is an exploration.</p>
+    </div>
+
+    <div class="control-group">
+      <div class="control-head"><span class="micro">Motion</span></div>
+      <div class="seg" role="group" aria-label="Motion">
+        <button data-motion-choice="system" aria-pressed="true">System</button>
+        <button data-motion-choice="full" aria-pressed="false">Full</button>
+        <button data-motion-choice="reduced" aria-pressed="false">Reduced</button>
+      </div>
+      <p class="control-note">Default follows the system. The override is for testing.</p>
+    </div>
+
+    <div class="control-group">
+      <label class="control-head" for="simulateSheet"><span class="micro">Simulate</span></label>
+      <div class="select-wrap">
+        <select id="simulateSheet" data-simulate>
+          <option value="happy">Happy path</option>
+          <option value="route">Wrong route</option>
+          <option value="low">Low signal</option>
+        </select>
+        <svg class="icon chev" aria-hidden="true"><use href="#i-chev-r"/></svg>
+      </div>
+    </div>
+
+    <button class="primary sheet-play" data-action="walkthrough"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg><span>Play walkthrough</span><span class="mono">36s</span></button>
+    <button class="text-link sheet-reset" data-action="reset">Reset flow</button>
+
+    <div class="rail-links">
+      <a class="rail-link" href="../mockup.html" target="_blank" rel="noopener"><span>Phase 1 mockup</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a class="rail-link" href="../" target="_blank" rel="noopener"><span>Live PWA</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a class="rail-link" href="./walkthrough.mp4" target="_blank" rel="noopener"><span>Walkthrough video</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    </div>
+    <p class="rail-foot">Example data · not a measurement.<br>Blueprint, not the app.</p>
+  </div>
+</dialog>
+
+<div id="announcer" class="sr-only" aria-live="polite"></div>
+<script src="./app.js"></script>
+</body>
+</html>

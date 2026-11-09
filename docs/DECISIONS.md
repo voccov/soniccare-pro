@@ -162,3 +162,20 @@ cannot set or read system volume or in-ear status, and never claims to.
 A channel-panned tone and an acoustic loopback are a Phase 0A experiment, not a feature.
 They become part of the method only if the PWA data shows a repeatable per-ear response.
 The voice SVR remains the validated method until then.
+
+## ADR-014 — Interactive web UX/UI blueprint before native work
+
+**Status:** accepted, 2026-11-09.
+
+Phase 1 UX/UI is explored as a standalone web blueprint in `web/blueprint/`, not native
+code. It is a design artifact with example data: Graphite (the product direction) and
+Porcelain (an exploration), System/Full/Reduced motion, happy/route/low-signal states,
+and a 36-second walkthrough recorded to `walkthrough.mp4`.
+
+It cannot measure and never claims to. It exists to test hierarchy, copy, motion, error
+states and the one-microphone-at-a-time model before SwiftUI. The product rules stay:
+both earbuds stay in, one microphone measures at a time, the Settings path is inline and
+scratch-verified, and PiP is Phase 2.
+
+The blueprint is code-native (HTML/CSS/SVG/Canvas/Web Animations) with no runtime
+dependency. The native build reuses the interaction model, not the code.

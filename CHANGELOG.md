@@ -7,6 +7,11 @@ semver.
 
 ### Added
 
+- Phase 1 interactive UX/UI blueprint at `web/blueprint/`: Graphite and Porcelain
+  variants, System/Full/Reduced motion, happy/route/low-signal states, inline Settings
+  and scratch, one-microphone-at-a-time measurement, a 36-second walkthrough and an MP4
+  recording.
+
 - `web/selftest.html`: a phone checklist mirroring the native self-test. It copies a
   structured pass/fail result and is linked from the install page.
 - macOS install path documented for iloader (DMG v2.4.1 or `brew install --cask
@@ -23,6 +28,8 @@ semver.
   <https://voccov.github.io/soniccare-pro/mockup.html>.
 
 ### Changed
+
+- The PWA, Phase 1 mockup and blueprint link to each other for quick switching.
 
 - `docs/SETUP.md` rewritten for the owner's macOS machine; `STATUS.md`, `PLAN.md` and
   `README.md` now point at the macOS install step and the self-test checklist.

@@ -83,6 +83,8 @@ the iPhone mic; exports JSON; no network calls; no persisted audio.
       `native-latest`. Unit tests run in CI with a timeout.
 - [ ] Install through SideStore; run the self-test on the iPhone and record it at
       <https://voccov.github.io/soniccare-pro/selftest.html>.
+- [x] Interactive UX/UI blueprint: `web/blueprint/` with Graphite/Porcelain, motion,
+      route/low-signal states, a 36-second walkthrough and a recorded video.
 - [ ] Design proof: connection, measurement and report screens with real tokens.
 - [ ] Capture Simulator screenshots (dark, large Dynamic Type, small and large iPhone).
 - [ ] Go/no-go review.

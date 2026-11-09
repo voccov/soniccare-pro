@@ -30,6 +30,14 @@ waiting for a SideStore install from the owner's Mac.
 Open it in Safari on the iPhone, then **Share → Add to Home Screen** for a full-screen
 app. It is the Phase 0A PWA: no SideStore, no expiry. The native app is Phase 0B.
 
+## UX blueprint
+
+**https://voccov.github.io/soniccare-pro/blueprint/**
+
+A clickable UX/UI blueprint for the planned guided flow: Graphite and Porcelain variants,
+System/Full/Reduced motion, happy/route/low-signal states, and a 36-second walkthrough
+video. It uses example data, does not request the microphone and is not the app.
+
 ## Native self-test build
 
 - Install page: **https://voccov.github.io/soniccare-pro/install.html**

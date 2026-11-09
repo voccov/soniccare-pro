@@ -60,6 +60,12 @@ PiP/route-change conflicts.
     that copies a structured result, linked from the install page;
   - the published IPA re-verified: 115,110 bytes, arm64, iOS 17+, `PiPGuide.mp4`
     included, no app icon by design.
+- Phase 1 UX/UI blueprint built and live (2026-11-09):
+  - <https://voccov.github.io/soniccare-pro/blueprint/>;
+  - Graphite and Porcelain variants; System/Full/Reduced motion; happy, wrong-route and
+    low-signal states; inline Settings + scratch; one microphone at a time;
+  - a 36-second walkthrough and `walkthrough.mp4` recording;
+  - example data only; no microphone request, no measurement.
 - Native self-test run on the iPhone (2026-11-09), installed via iloader because SideStore
   sign-in returns `-80045`:
   - microphone permission Granted; route BluetoothHFP; live level moved when speaking;
@@ -72,16 +78,18 @@ PiP/route-change conflicts.
 
 ## Next actions
 
-1. Finish the on-device self-test checklist and send the copied result.
-2. Diagnose the haptic tap (system haptics vs generator lifetime); fix and rebuild if it
+1. Review the UX/UI blueprint at <https://voccov.github.io/soniccare-pro/blueprint/>;
+   pick Graphite or Porcelain and note any step that should change.
+2. Finish the on-device self-test checklist and send the copied result.
+3. Diagnose the haptic tap (system haptics vs generator lifetime); fix and rebuild if it
    is the app.
-3. Run the Phase 0A **tone/loopback experiment** in the PWA before native Phase 1:
+4. Run the Phase 0A **tone/loopback experiment** in the PWA before native Phase 1:
    channel-panned ping, quiet tone/sweep through the AirPods while the HFP mic is active.
-4. Run one more controlled left+right PWA pair at the same volume and distance.
-5. If the left stays at least 6 dB weaker, clean the **left mesh only**, wait 2 hours, and
+5. Run one more controlled left+right PWA pair at the same volume and distance.
+6. If the left stays at least 6 dB weaker, clean the **left mesh only**, wait 2 hours, and
    retest.
-6. Set the final thresholds and start the native MVP.
-7. Fix the SideStore `-80045` sign-in for the 7-day refresh; iloader is the interim
+7. Set the final thresholds and start the native MVP.
+8. Fix the SideStore `-80045` sign-in for the 7-day refresh; iloader is the interim
    installer.
 
 ## Blockers

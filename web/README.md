@@ -48,6 +48,12 @@ URL.
 No uploads, accounts, analytics, third-party scripts or persisted audio. Results are
 stored in `localStorage` on the phone and exported only when you tap Export.
 
+## UX/UI blueprint
+
+`blueprint/` is the interactive Phase 1 UX/UI blueprint: Graphite and Porcelain
+variants, motion controls, error states and a recorded walkthrough. It uses example
+data and does not request the microphone. Open <https://voccov.github.io/soniccare-pro/blueprint/>.
+
 ## Phase 1 mockup
 
 `mockup.html` is a clickable design mockup of the planned guided flow. It uses example
