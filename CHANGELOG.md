@@ -16,6 +16,8 @@ semver.
 
 - `docs/SETUP.md` rewritten for the owner's macOS machine; `STATUS.md`, `PLAN.md` and
   `README.md` now point at the macOS install step and the self-test checklist.
+- `docs/SETUP.md` notes that Tailscale cannot replace LocalDevVPN, that iOS keeps one VPN
+  active at a time, and the iOS 26.4+ remote-pairing workaround.
 - The published IPA was re-verified: arm64, iOS 17+, iPhone only, `PiPGuide.mp4`
   bundled, 115,110 bytes.
 

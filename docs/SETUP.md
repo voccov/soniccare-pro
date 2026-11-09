@@ -45,6 +45,11 @@ create it first (section 3); it takes a few minutes.
    <https://apps.apple.com/app/localdevvpn/id6755608044>
 4. Open LocalDevVPN and tap **Connect**. Allow the VPN configuration when asked.
    Keep it connected during installs and refreshes.
+
+   **Already using Tailscale or another VPN?** iOS keeps only one VPN active at a time,
+   so disconnect it while LocalDevVPN is connected, then switch back afterwards. Tailscale
+   cannot replace LocalDevVPN: SideStore needs an on-device VPN that reaches iOS's own
+   installation service, not a route to your home network.
 5. Open **SideStore** and sign in with the same spare Apple ID.
 6. Go to **My Apps** and tap the **7 DAYS** counter next to SideStore to refresh it.
 7. If asked to revoke or create a certificate, tap **Yes** or **Refresh Now**.
@@ -74,6 +79,10 @@ Swedish version:
   another cable or USB port. Avoid hubs and charge-only cables.
 - **SideStore shows an error:** send the exact error text or a screenshot. Do not send
   passwords or two-factor codes.
+- **SideStore says “no ipsec/IKEv2 interface found” on iOS 26.4 or later:** use a remote
+  pairing file. In SideStore: **Settings → Pairing File Management** → long-press
+  **Remote Pairing** → **Set as Preferred**, then force-quit and reopen SideStore. If
+  there is no Remote Pairing entry, generate one with the current iloader and import it.
 - **The install button on the install page does nothing:** SideStore is not installed or
   not refreshed yet. Finish the iPhone steps above first.
 - **The app expires after 7 days:** open LocalDevVPN, then SideStore, and tap the days
