@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#070709">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="SonicCare">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <title>Self-test checklist — SonicCare Pro</title>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="led live" aria-hidden="true"></span><span class="wordmark">SonicCare</span><span class="version">native · 0.1.0</span></div>
+    <a class="status" href="./install.html" style="text-decoration:none;color:var(--muted)">Install</a>
+  </header>
+
+  <main>
+    <section class="stack">
+      <div class="card">
+        <p class="micro">Native · Phase 0B self-test</p>
+        <h1>Self-test checklist</h1>
+        <p class="muted">Run this after installing SonicCare Pro. Tap the result for each check, then copy the summary and send it back. Nothing is uploaded and no audio is recorded.</p>
+        <p class="fine">If a check fails, stop and send the exact text or a screenshot. Do not clean anything yet.</p>
+      </div>
+
+      <div class="card">
+        <p class="micro">What the app showed</p>
+        <label class="field">
+          <span>iOS version</span>
+          <input id="ios" type="text" inputmode="text" autocomplete="off" placeholder="for example 26.7.2">
+        </label>
+        <label class="field">
+          <span>AirPods model</span>
+          <input id="airpods" type="text" inputmode="text" autocomplete="off" placeholder="for example AirPods Pro 2">
+        </label>
+        <label class="field">
+          <span>Route label, as shown</span>
+          <input id="route" type="text" inputmode="text" autocomplete="off" placeholder="for example Bluetooth HFP">
+        </label>
+        <label class="field">
+          <span>Sample rate, as shown</span>
+          <input id="rate" type="text" inputmode="text" autocomplete="off" placeholder="for example 24 kHz">
+        </label>
+        <label class="field">
+          <span>Notes (optional)</span>
+          <textarea id="notes" rows="3" placeholder="Anything that looked wrong"></textarea>
+        </label>
+      </div>
+
+      <div class="card">
+        <p class="micro">Checks</p>
+        <div id="checks" class="checklist"></div>
+      </div>
+
+      <div class="card">
+        <p class="micro">Result</p>
+        <p class="muted">This is exactly what to send back. It stays on this phone until you copy it.</p>
+        <pre id="summary" class="result" aria-live="polite"></pre>
+        <button id="copy" class="primary" type="button">Copy result</button>
+        <p id="copy-status" class="fine copy-status" role="status"></p>
+        <button id="reset" class="secondary" type="button">Reset checklist</button>
+      </div>
+
+      <div class="card quiet">
+        <p class="micro">Reminder</p>
+        <p class="muted">This build proves the native chain only. It is not the final five-step diagnostic flow, and it does not measure left versus right yet. The PWA remains the working measurement tool.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const CHECKS = [
+      { id: "install", title: "Installs and opens", note: "The app appears on the Home Screen and opens without a crash." },
+      { id: "permission", title: "Microphone permission", note: "Tap Enable microphone. The permission badge shows Granted." },
+      { id: "route", title: "AirPods route", note: "With the AirPods connected, Route shows a Bluetooth HFP port." },
+      { id: "rate", title: "Sample rate", note: "Sample rate shows a value, for example 24 kHz, 16 kHz or 8 kHz." },
+      { id: "level", title: "Live level", note: "Speak, and the live level moves above −60 dB." },
+      { id: "tone", title: "1 kHz tone", note: "The tone is audible in the AirPods." },
+      { id: "haptic", title: "Haptic tap", note: "The phone gives a haptic tap." },
+      { id: "pip", title: "PiP guide", note: "Start PiP guide: the video appears, floats over Settings, and loops." },
+      { id: "pause", title: "Mic pauses for PiP", note: "The microphone stops while the guide is open; Enable microphone works when you return." }
+    ];
+
+    const states = {};
+    const host = document.getElementById("checks");
+    const summary = document.getElementById("summary");
+    const copyStatus = document.getElementById("copy-status");
+
+    const STATE_LABEL = { pass: "Pass", fail: "Fail", skip: "Skipped", none: "Not tested" };
+
+    function renderChecks() {
+      host.innerHTML = "";
+      CHECKS.forEach((check) => {
+        const row = document.createElement("div");
+        row.className = "check";
+
+        const title = document.createElement("p");
+        title.className = "check-title";
+        title.textContent = check.title;
+
+        const note = document.createElement("p");
+        note.className = "check-note";
+        note.textContent = check.note;
+
+        const group = document.createElement("div");
+        group.className = "check-states";
+        group.setAttribute("role", "group");
+        group.setAttribute("aria-label", check.title);
+
+        ["pass", "fail", "skip"].forEach((state) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "check-btn";
+          button.dataset.state = state;
+          button.textContent = STATE_LABEL[state];
+          button.setAttribute("aria-pressed", String(states[check.id] === state));
+          button.addEventListener("click", () => {
+            states[check.id] = states[check.id] === state ? "none" : state;
+            group.querySelectorAll("button").forEach((peer) => {
+              peer.setAttribute("aria-pressed", String(states[check.id] === peer.dataset.state));
+            });
+            updateSummary();
+          });
+          group.appendChild(button);
+        });
+
+        row.append(title, note, group);
+        host.appendChild(row);
+      });
+    }
+
+    function value(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function today() {
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    }
+
+    function updateSummary() {
+      const lines = [
+        "SonicCare Pro — Phase 0B self-test",
+        `Date: ${today()}`,
+        `iOS: ${value("ios") || "—"}`,
+        `AirPods: ${value("airpods") || "—"}`,
+        `Route: ${value("route") || "—"}`,
+        `Sample rate: ${value("rate") || "—"}`,
+        ""
+      ];
+      CHECKS.forEach((check, index) => {
+        lines.push(`${index + 1}. ${check.title}: ${STATE_LABEL[states[check.id] || "none"]}`);
+      });
+      const notes = value("notes");
+      if (notes) {
+        lines.push("", `Notes: ${notes}`);
+      }
+      summary.textContent = lines.join("\n");
+      copyStatus.textContent = "";
+    }
+
+    async function copyResult() {
+      const text = summary.textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        copyStatus.textContent = "Copied. Paste it into the chat.";
+      } catch (error) {
+        const area = document.createElement("textarea");
+        area.value = text;
+        area.setAttribute("readonly", "");
+        area.style.position = "fixed";
+        area.style.opacity = "0";
+        document.body.appendChild(area);
+        area.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(area);
+        copyStatus.textContent = ok
+          ? "Copied. Paste it into the chat."
+          : "Copy failed. Select the text above and copy it manually.";
+      }
+    }
+
+    document.querySelectorAll("input, textarea").forEach((input) => {
+      input.addEventListener("input", updateSummary);
+    });
+
+    document.getElementById("copy").addEventListener("click", copyResult);
+    document.getElementById("reset").addEventListener("click", () => {
+      CHECKS.forEach((check) => { states[check.id] = "none"; });
+      document.querySelectorAll("input, textarea").forEach((input) => { input.value = ""; });
+      renderChecks();
+      updateSummary();
+      document.getElementById("ios").focus();
+    });
+
+    renderChecks();
+    updateSummary();
+  </script>
+</body>
+</html>

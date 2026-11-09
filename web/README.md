@@ -23,6 +23,9 @@ URL.
 - Computes SVR per ear as band-integrated `HF − LF`.
 - Compares left and right; supports a bilateral `Both high-frequency loss` category.
 - Exports a JSON file with the raw values. Audio is never uploaded or recorded.
+- Also hosts the native install page and the Phase 0B self-test checklist
+  (`install.html`, `selftest.html`); the checklist copies a structured result and sends
+  nothing.
 
 ## Limits
 

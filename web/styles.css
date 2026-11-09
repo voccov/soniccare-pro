@@ -259,6 +259,124 @@ h2 {
   margin: 0;
 }
 
+.checklist {
+  display: grid;
+  margin-top: 12px;
+}
+
+.check {
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+
+.check:first-child {
+  padding-top: 2px;
+  border-top: 0;
+}
+
+.check-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.check-note {
+  margin-top: 2px;
+  color: var(--tertiary);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.check-states {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.check-btn {
+  flex: 1 1 0;
+  min-height: 44px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.check-btn[aria-pressed="true"][data-state="pass"] {
+  color: var(--good);
+  border-color: color-mix(in srgb, var(--good) 40%, transparent);
+  background: color-mix(in srgb, var(--good) 10%, transparent);
+}
+
+.check-btn[aria-pressed="true"][data-state="fail"] {
+  color: var(--bad);
+  border-color: color-mix(in srgb, var(--bad) 40%, transparent);
+  background: color-mix(in srgb, var(--bad) 10%, transparent);
+}
+
+.check-btn[aria-pressed="true"][data-state="skip"] {
+  color: var(--text);
+  border-color: var(--line-strong);
+  background: var(--surface-raised);
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  color: var(--text);
+  font: inherit;
+  font-weight: 400;
+}
+
+.field textarea {
+  min-height: 86px;
+  resize: vertical;
+}
+
+.field input:focus-visible,
+.field textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.result {
+  margin: 12px 0;
+  padding: 14px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.copy-status {
+  min-height: 18px;
+  margin-top: 8px;
+}
+
+#reset {
+  margin-top: 10px;
+}
+
 .status-card {
   display: grid;
   gap: 10px;
