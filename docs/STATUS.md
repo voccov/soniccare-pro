@@ -1,7 +1,7 @@
 # Status — SonicCare Pro
 
 **Version:** `0.1.0-dev.4`  
-**Phase:** 0A — PWA live; 0B native self-test run on the iPhone; haptic and sample-rate checks open  
+**Phase:** 0A — PWA live; 0B native self-test run on the iPhone; Phase 1 UX/UI blueprint ready for review  
 **Last updated:** 2026-11-09  
 **State:** PWA is live and working on the owner's AirPods. Native Phase 0B is built and
 installed via iloader: the microphone chain, route, live level, tone and PiP work; the
@@ -60,7 +60,7 @@ PiP/route-change conflicts.
     that copies a structured result, linked from the install page;
   - the published IPA re-verified: 115,110 bytes, arm64, iOS 17+, `PiPGuide.mp4`
     included, no app icon by design.
-- Phase 1 UX/UI blueprint built and live (2026-11-09):
+- Phase 1 UX/UI blueprint built and live (2026-11-09), ready for review:
   - <https://voccov.github.io/soniccare-pro/blueprint/>;
   - Graphite and Porcelain variants; System/Full/Reduced motion; happy, wrong-route and
     low-signal states; inline Settings + scratch; one microphone at a time;
