@@ -11,6 +11,12 @@ semver.
   structured pass/fail result and is linked from the install page.
 - macOS install path documented for iloader (DMG v2.4.1 or `brew install --cask
   iloader`), including iPhone trust, Developer Mode, LocalDevVPN and troubleshooting.
+- Phase 0A experiment: channel-panned ear-identity ping and a quiet tone/sweep loopback
+  through the AirPods while the HFP microphone is active. The data decides whether it
+  becomes a feature; the voice SVR remains the method.
+- Phase 1 interaction direction: readiness and fit-test prompt, ear-identity ping,
+  one-microphone-at-a-time measurement with two ear cards, target-level ring, vector
+  animation, and no PiP in the MVP.
 
 ### Changed
 
@@ -22,6 +28,13 @@ semver.
   direct-IPA fallback for the self-test build.
 - The published IPA was re-verified: arm64, iOS 17+, iPhone only, `PiPGuide.mp4`
   bundled, 115,110 bytes.
+- PiP is deferred to Phase 2 (`ADR-013`); the MVP uses an inline illustrated Settings
+  path.
+- Recorded the first native self-test run: haptic tap does not fire, sample rate displays
+  48000 Hz (engine rate, not proof of the HFP link), and the header scrolls under the
+  status bar.
+- `docs/PLAN.md`, `docs/UX.md`, `PRODUCT.md`, `docs/DECISIONS.md` and `docs/STATUS.md`
+  reflect the interactive direction.
 
 ## [0.1.0-dev.4] — 2026-11-05
 

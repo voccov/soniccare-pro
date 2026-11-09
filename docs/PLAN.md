@@ -34,7 +34,9 @@ step: clean and retest, or stop and seek service.
 - One linear flow with inline guidance and visible skips. No Guide me / Quick test mode
   toggle.
 - Categorical report plus measured dB delta. No 0–100 headline score.
-- PiP uses a bundled looping MP4 with `AVQueuePlayer` + `AVPlayerLooper`; no Live Activity.
+- PiP is Phase 2, not the MVP. The MVP shows the Settings path as an inline illustrated
+  step; the bundled loop with `AVQueuePlayer` + `AVPlayerLooper` is the later guide. No
+  Live Activity.
 - No 165 Hz tone in the MVP.
 - Phase 0A PWA is a hard gate for the native MVP; native remains the craft build.
 - Audio stays on the phone. No uploads, accounts or analytics.
@@ -58,6 +60,10 @@ Purpose:
 - Serve as a fallback if SideStore is painful or expires between uses.
 - Act as a **hard gate** for the native MVP: if the PWA solves the problem, native becomes
   an optional craft build.
+- Test the **interactive audio idea** before native work: a channel-panned left/right ping
+  before capture, and a quiet tone or sweep through the AirPods while the HFP microphone
+  is active. Decide from data whether the loopback becomes a feature; the voice SVR
+  remains the validated method until then.
 
 Acceptance: works in Safari on the iPhone; displays route label and sample rate; measures
 both ears; shows categorical results; the scratch check distinguishes the AirPods mic from
@@ -94,7 +100,24 @@ supported.
       detection.
 - [ ] Provisional categories: balanced, unilateral loss, bilateral loss, severely blocked;
       thresholds are starting hypotheses and are calibrated from Phase 0A data.
-- [ ] Five-step flow: connection, side setup, voice test, report, recovery.
+- [ ] Guided flow: readiness, connection, ear identity, side setup, voice test, report,
+      recovery.
+- [ ] Readiness: case → ears, official Ear Tip Fit Test prompt, quiet-room check and a
+      volume-safety gate. Both earbuds stay in; the app never asks the user to remove one
+      for the measurement.
+- [ ] Stereo ear-identity ping before capture: a left-only or right-only tone over A2DP,
+      then “Which ear did you hear it in?”. Catches swapped earbuds and a dead driver;
+      makes no microphone claim.
+- [ ] One microphone at a time. Two ear cards, but only the active microphone has a live
+      meter; the other card says **Next**. No fake simultaneous left/right data.
+- [ ] Target-level ring and automatic phase detection; reject low or clipped frames and
+      ask for a short retry instead of accepting a bad capture.
+- [ ] Inline illustrated Settings path (Bluetooth → (i) → Microphone → Always Left/Right)
+      with the fingernail-scratch verification. PiP stays in Phase 2.
+- [ ] Purposeful vector animation for the case, earbud, mesh zone and level ring; Reduce
+      Motion variants. Only the level ring and spectrum animate continuously.
+- [ ] Acoustic loopback or sweep only if the Phase 0A experiment shows a repeatable
+      per-ear response. The voice SVR remains the default method.
 - [ ] One flow with inline “Why” disclosures, visible skip, resume after backgrounding.
 - [ ] Report: categorical verdict, confidence, dB delta, spectral diff, “what we measured /
       what we didn’t”.
@@ -106,13 +129,14 @@ supported.
 - [ ] On-device test with the owner; one batch of fixes.
 
 **Acceptance:** a complete left/right check in under five minutes; both ears can be flagged
-as muffled; skipped steps show “Not tested”; no fabricated results; no crash; copy and
-contrast checks pass.
+as muffled; both earbuds stay in and only one microphone is measured at a time; skipped
+steps show “Not tested”; no fabricated results; a non-technical user can finish without
+audio jargon; no crash; copy and contrast checks pass.
 
 ## Phase 2 — Copilot and polish (`v0.3.0`)
 
 - [ ] PiP video guide with `AVQueuePlayer` + `AVPlayerLooper`; test auto-start and button
-      fallback.
+      fallback. The MVP ships the inline illustrated Settings path; PiP is the enhancement.
 - [ ] Settings checklist with manual path; no private URL promise.
 - [ ] Motion pass: step transitions, result reveal, level ring, success check.
 - [ ] Vector hero; four-zone anatomical diagram from static SVG/PDF assets.

@@ -9,10 +9,11 @@ One linear flow. Inline guidance. A visible skip on every optional step. No mode
 
 ```
 Start
-  → Pre-flight (permission, route, quiet room)
-  → Connection (AirPods / demo)
-  → Side setup (left, then right; PiP video; fingernail scratch)
-  → Voice test (Ahh and Ssss, per ear)
+  → Readiness (case, ears, fit test, quiet room, volume)
+  → Connection (permission, route, sample rate)
+  → Ear identity (left/right ping; swapped earbuds)
+  → Side setup (left, then right; inline Settings visual; fingernail scratch)
+  → Voice test (Ahh and Ssss, per ear; target level)
   → Report (category, dB delta, spectral diff)
   → Recovery (four zones, safety, retest)
   → Done / Before-after
@@ -26,14 +27,43 @@ Start
 - No modal tour, no repeated coach marks, no popup on every launch.
 - A returning user can skip the explanation, not the honesty rules.
 
+## Phase 1 interaction direction (proposed, 2026-11-09)
+
+- **Both earbuds stay in. One microphone at a time.** iOS HFP sends one mono stream, so the
+  app never shows two live microphone meters. Two ear cards are allowed: the active card
+  has the live meter, the other says **Next** until the user switches the microphone in
+  Settings. No fake simultaneous data.
+- **Readiness before measurement.** Show the case → earbuds → ears sequence with a short
+  vector animation. Ask the user to run Apple's Ear Tip Fit Test and confirm a good seal;
+  a bad seal can look like high-frequency loss. Check the room noise, then set the volume
+  deliberately low.
+- **Ear identity ping.** Before the microphone is active, play a left-only or right-only
+  tone over A2DP and ask “Which ear did you hear it in?”. This catches swapped earbuds and
+  a dead driver, and makes no microphone claim.
+- **Volume safety.** The app cannot read or set system volume. It renders its own tone at
+  a low digital level, asks “Can you hear it?”, and raises one step only with consent. No
+  tone during cleaning, no 165 Hz, no surprise loud playback.
+- **One target-level ring.** Guide the voice into a comfortable band; reject frames that
+  are too quiet, clipped or too short. A short retry is better than a bad capture.
+- **Purposeful motion.** The case, earbud, mesh zone and ear map animate on step changes;
+  only the level ring and spectrum animate continuously. Reduce Motion uses crossfades.
+- **Block only validity.** Block the measurement until the route, microphone and level are
+  verified. Physical actions use a confirmation, not a pretend sensor; every optional step
+  keeps a visible skip and the report says **Not tested**. The cleaning guide is never
+  blocked.
+- **Acoustic loopback is an experiment.** A tone or sweep played through the AirPods while
+  the HFP microphone is active is tested in the PWA first. It becomes a feature only if
+  the data shows a repeatable per-ear response; until then the voice SVR is the method.
+
 ## Skip matrix
 
 Visible as a text link, never a competing button.
 
 | Step | Skip behaviour |
 |---|---|
-| Pre-flight | Use the iPhone microphone in demo mode; every result is labelled Demo. |
-| Connection | Same as pre-flight; the report says the route was not verified. |
+| Readiness | Use the iPhone microphone in demo mode; every result is labelled Demo. |
+| Connection | Same as readiness; the report says the route was not verified. |
+| Ear identity | Skip the ping; the ear side stays unverified and the report says so. |
 | Side setup | Single-ear check; no left/right comparison. The report says so. |
 | Voice phase | Missing band is shown as Not tested; no category for incomplete data. |
 | Ear test | Only the completed ear is reported; the other is Not tested. |
@@ -53,29 +83,39 @@ missing. The app never fills a gap with a guess.
 - Last result card if a baseline exists: date, left/right category, `See result`.
 - Settings in the toolbar.
 
-### Pre-flight
+### Readiness
 
-- Three rows: microphone access, AirPods route, quiet room.
-- Each row: icon, label, status, and a fix action (`Open Settings`, `Check connection`,
-  `I'm ready`).
-- Primary: `Continue` when ready; otherwise `Use iPhone microphone` (demo) with an amber
-  note.
+- Show the case → earbuds → ears sequence as a short vector animation.
+- Rows: `Both earbuds in`, `Ear Tip Fit Test` (Settings path and a good-seal confirmation),
+  `Quiet room`, `Volume low`.
+- Each row: icon, label, status, and one action. The app cannot sense in-ear status or run
+  the fit test; it asks for a clear confirmation and explains why it matters.
+- Primary: `Continue` when ready.
 - `Skip setup` link with the skip confirmation.
 
 ### Connection
 
-- Vector hero card; connection state; input route; sample rate when available.
+- Vector hero card; microphone access, connection state, input route, sample rate.
 - Warning if Control Center Mic Mode is not Standard.
 - Demo toggle in the top corner, clearly labelled.
 - Primary `Continue`; secondary `Not connected?`.
 
+### Ear identity
+
+- Before the microphone is active, play a left-only ping over A2DP.
+- Ask `Which ear did you hear it in?` with `Left`, `Right`, `Both`, `Neither`.
+- `Right` on a left ping means the earbuds are swapped: guide the user to swap them and
+  test again. `Both` or `Neither` points to fit, connection or a driver problem.
+- This is a playback check, not a microphone measurement. The report never uses it as a
+  per-ear result.
+
 ### Side setup
 
 - Three-step visual: Settings → Bluetooth → (i) → Microphone → Always Left/Right.
-- No one-tap Bluetooth settings promise. The primary path is the visual and the PiP video;
-  a Control Center long-press tip may be shown, but it is not guaranteed.
-- `Start floating guide` plays the bundled `PiPGuide.mp4` in a standard video PiP window.
-  If PiP is unavailable, the checklist stays on screen.
+- No one-tap Bluetooth settings promise. The MVP path is an inline visual of the three
+  Settings taps, plus a Control Center long-press tip where it works. PiP is Phase 2.
+- The bundled `PiPGuide.mp4` remains the Phase 2 enhancement; the checklist stays on
+  screen when it is not used.
 - On return: `Which microphone did you set?` segmented control.
 - `Test left microphone`: ask the user to **lightly scratch the bottom silver ring with a
   fingernail for one second**. Do not tap the stem; the force sensor can trigger a gesture.
@@ -89,6 +129,11 @@ missing. The app never fills a gap with a guess.
 
 - Full-screen measurement session; no navigation chrome that invites accidental exit.
 - Step header, ear indicator, phase label, 3-2-1 countdown, live level ring and spectrum.
+- The level ring shows a target band. Accept only frames inside it; reject low or clipped
+  audio and ask for a short retry with a specific instruction.
+- Phase detection starts and stops the capture when enough valid frames exist; the user
+  holds the sound for three seconds and does not press anything.
+- No UI sounds or haptics during the capture; confirm after, not over the microphone.
 - Prompts: `Say "Ahh" for three seconds` and `Say "Ssss" for three seconds`.
 - `Start`, `Stop`, `Test again`, `Skip this phase`.
 - Low signal: `We didn't hear enough. Move the phone closer or try again in a quieter

@@ -57,6 +57,10 @@ medical device.
   Absolute calibration is not possible. Comparisons are relative. The app reads the actual
   input sample rate (8, 16 or 24 kHz) and lowers confidence when the high band is
   unavailable.
+- HFP sends one mono microphone stream. The app can play a left/right ping over A2DP
+  before capture, but it cannot prove left/right channel isolation while the HFP
+  microphone is active. It never shows two live microphone meters or claims a simultaneous
+  per-ear measurement.
 - SVR is cross-phase and band-integrated: `LF` from Phase A (“Ahhh”, 150–800 Hz), `HF` from
   Phase B (“Ssss”, 3–6.5 kHz). Per-ear thresholds are provisional until Phase 0A data.
 - Firmware, serial and battery are not available through public APIs. The app must not
@@ -64,13 +68,16 @@ medical device.
 - Free sideload limits: 3 apps per device including SideStore, 10 App IDs per week,
   7-day provisioning. The app is an occasional-use utility, so baseline export/import and
   a PWA fallback matter.
-- No App Store distribution in v1. Private APIs are avoided; PiP is used only for a
-  bundled guide video behind a `PERSONAL_BUILD` flag.
+- No App Store distribution in v1. Private APIs are avoided; PiP is a Phase 2
+  enhancement for a bundled guide video behind a `PERSONAL_BUILD` flag. The MVP uses an
+  inline illustrated Settings path.
 - One linear flow with inline guidance and visible skips. No Guide me / Quick test mode
   toggle.
 - Per-ear SVR plus a bilateral `Both high-frequency loss` category; left/right similarity
   alone cannot rule out two equally muffled ears.
-- PiP uses a bundled looping MP4 with `AVQueuePlayer` + `AVPlayerLooper`.
+- Both earbuds stay in. The app measures one microphone at a time; the second ear card
+  says **Next** until the microphone is switched in Settings.
+- PiP uses a bundled looping MP4 with `AVQueuePlayer` + `AVPlayerLooper` in Phase 2.
 - Phase 0A PWA is a hard gate for the native MVP; native remains the craft build.
 - Categorical report plus measured dB delta. No 0–100 headline score.
 - No 165 Hz tone and no Live Activity in the MVP.

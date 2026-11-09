@@ -1,14 +1,14 @@
 # Status — SonicCare Pro
 
 **Version:** `0.1.0-dev.4`  
-**Phase:** 0A — PWA live; 0B native self-test built and audited; install from macOS pending  
+**Phase:** 0A — PWA live; 0B native self-test run on the iPhone; haptic and sample-rate checks open  
 **Last updated:** 2026-11-09  
-**State:** PWA is live and working on the owner's AirPods. Native Phase 0B is built: an
-unsigned IPA on GitHub and an install page are ready. The owner now has a macOS computer
-with the iPhone and a USB cable, so the SideStore blocker is a physical 20-minute step,
-not an unknown. The self-test has not run on the iPhone yet. The left-ear diagnosis still
-needs one controlled repeat. The audit fixed the PWA's unverified-report path and the
-native PiP/route-change conflicts.
+**State:** PWA is live and working on the owner's AirPods. Native Phase 0B is built and
+installed via iloader: the microphone chain, route, live level, tone and PiP work; the
+haptic tap does not fire yet. SideStore is installed but its Apple ID sign-in returns
+`-80045`, so the 7-day refresh still needs a fix. The left-ear diagnosis still needs one
+controlled repeat. The audit fixed the PWA's unverified-report path and the native
+PiP/route-change conflicts.
 
 ## Done
 
@@ -60,23 +60,34 @@ native PiP/route-change conflicts.
     that copies a structured result, linked from the install page;
   - the published IPA re-verified: 115,110 bytes, arm64, iOS 17+, `PiPGuide.mp4`
     included, no app icon by design.
+- Native self-test run on the iPhone (2026-11-09), installed via iloader because SideStore
+  sign-in returns `-80045`:
+  - microphone permission Granted; route BluetoothHFP; live level moved when speaking;
+  - 1 kHz tone audible; PiP works and pauses the microphone as designed, but is deferred
+    to Phase 2; the rest of the chain is reported working;
+  - **haptic tap does not fire**; under diagnosis (system haptics vs generator lifetime);
+  - sample rate displays **48000 Hz**: that is the engine rate, not proof of the HFP link
+    rate; Phase 1 must still set the band from the FFT cliff;
+  - the header scrolls under the status bar; fix in the design pass.
 
 ## Next actions
 
-1. On the Mac: install SideStore with iloader (macOS DMG v2.4.1) using the spare Apple ID;
-   follow `docs/SETUP.md`.
-2. Install the native self-test from the install page.
-3. Run the self-test and record it at
-   <https://voccov.github.io/soniccare-pro/selftest.html>; send the copied result.
+1. Finish the on-device self-test checklist and send the copied result.
+2. Diagnose the haptic tap (system haptics vs generator lifetime); fix and rebuild if it
+   is the app.
+3. Run the Phase 0A **tone/loopback experiment** in the PWA before native Phase 1:
+   channel-panned ping, quiet tone/sweep through the AirPods while the HFP mic is active.
 4. Run one more controlled left+right PWA pair at the same volume and distance.
 5. If the left stays at least 6 dB weaker, clean the **left mesh only**, wait 2 hours, and
    retest.
 6. Set the final thresholds and start the native MVP.
+7. Fix the SideStore `-80045` sign-in for the 7-day refresh; iloader is the interim
+   installer.
 
 ## Blockers
 
-- SideStore install from the owner's Mac; the iPhone and USB cable are available.
-- Native self-test results.
+- Haptic tap and the sample-rate/bandwidth question from the first self-test.
+- SideStore sign-in `-80045` for on-device refresh; not blocking the self-test.
 - Another controlled PWA pair for repeatability.
 
 ## Known gaps

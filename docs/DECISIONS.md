@@ -145,3 +145,20 @@ Keep `status.sh` and `check-docs.sh`. Defer the copy/token/contrast lint scripts
 screenshot automation beyond the basic captures, and pseudo-localization until the audio
 engine works. The high-value automation is the build, tests, Simulator screenshots,
 accessibility audit and release.
+
+## ADR-013 — PiP is Phase 2; the MVP is an interactive inline guide
+
+**Status:** accepted, 2026-11-09.
+
+PiP moves out of the MVP. The Settings path is an inline illustrated step with the manual
+taps; the bundled looping video stays a Phase 2 enhancement. The MVP focuses on a guided,
+animated flow: readiness, ear-identity ping, microphone setup with scratch verification,
+one-microphone-at-a-time measurement, report and recovery.
+
+Both earbuds stay in. HFP is mono, so the app never shows two live microphone meters; the
+second ear card says **Next** until the user switches the microphone in Settings. The app
+cannot set or read system volume or in-ear status, and never claims to.
+
+A channel-panned tone and an acoustic loopback are a Phase 0A experiment, not a feature.
+They become part of the method only if the PWA data shows a repeatable per-ear response.
+The voice SVR remains the validated method until then.
