@@ -898,9 +898,11 @@
     if (state.step === 4) resizeSpectrum();
   });
 
-  if (new URLSearchParams(location.search).has('film')) document.body.classList.add('film');
+  const filmMode = new URLSearchParams(location.search).has('film');
+  if (filmMode) document.body.classList.add('film');
   accent = accentColor();
   sync();
   renderRoute();
   renderMeasure();
+  if (filmMode) setTimeout(() => playWalkthrough(), 800);
 })();

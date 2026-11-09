@@ -15,8 +15,8 @@ the app. All values are example data.
   and the disabled Continue.
 - **Play walkthrough (36 s).** The automated run covers every step. The recording is
   `walkthrough.mp4`.
-- **Film mode.** Add `?film=1` to hide the Studio controls and the walkthrough banner
-  before screen recording.
+- **Film mode.** Add `?film=1` to hide the Studio controls, hide the walkthrough banner
+  and auto-play the walkthrough. Reload to replay; record the screen.
 
 ## Decisions the blueprint makes visible
 
