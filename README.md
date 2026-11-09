@@ -7,7 +7,7 @@ claims a measurement it did not make.
 
 Status: **Phase 0A — PWA live; Phase 0B native self-test built.** Plan revision
 `0.1.0-dev.4`. The PWA is in `web/` and live. The native self-test IPA is built and
-waiting for a SideStore install on the iPhone.
+waiting for a SideStore install from the owner's Mac.
 
 ## Route
 
@@ -33,6 +33,7 @@ app. It is the Phase 0A PWA: no SideStore, no expiry. The native app is Phase 0B
 ## Native self-test build
 
 - Install page: **https://voccov.github.io/soniccare-pro/install.html**
+- Self-test checklist: **https://voccov.github.io/soniccare-pro/selftest.html**
 - IPA: **https://github.com/voccov/soniccare-pro/releases/download/native-latest/SonicCarePro.ipa**
 - Phase 0B checks the native chain: microphone permission, AirPods HFP route, sample rate,
   live RMS, 1 kHz tone, haptics, looping PiP guide. It is not the final five-step UI. This

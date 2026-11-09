@@ -5,6 +5,20 @@ semver.
 
 ## [Unreleased]
 
+### Added
+
+- `web/selftest.html`: a phone checklist mirroring the native self-test. It copies a
+  structured pass/fail result and is linked from the install page.
+- macOS install path documented for iloader (DMG v2.4.1 or `brew install --cask
+  iloader`), including iPhone trust, Developer Mode, LocalDevVPN and troubleshooting.
+
+### Changed
+
+- `docs/SETUP.md` rewritten for the owner's macOS machine; `STATUS.md`, `PLAN.md` and
+  `README.md` now point at the macOS install step and the self-test checklist.
+- The published IPA was re-verified: arm64, iOS 17+, iPhone only, `PiPGuide.mp4`
+  bundled, 115,110 bytes.
+
 ## [0.1.0-dev.4] — 2026-11-05
 
 ### Changed

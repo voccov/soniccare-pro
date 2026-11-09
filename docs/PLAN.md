@@ -1,8 +1,8 @@
 # SonicCare Pro — build plan
 
 Status: **Phase 0A/0B — proof.** Plan revision `0.1.0-dev.4`, after two independent reviews.
-The PWA is live; the native Phase 0B self-test is built, tested in CI and waiting for a
-SideStore install. Last updated: 2026-11-05.
+The PWA is live; the native Phase 0B self-test is built, tested in CI and waiting for an
+install from the owner's Mac. Last updated: 2026-11-09.
 
 Review disposition: `docs/REVIEW_RESPONSE.md`. Full review packet:
 `docs/PLAN_FOR_REVIEW.md`.
@@ -66,7 +66,7 @@ the iPhone mic; exports JSON; no network calls; no persisted audio.
 ## Phase 0B — Native proof (`v0.1.0`)
 
 - [x] Create the public GitHub repo and connect the deploy key.
-- [ ] Complete the one-time SideStore setup; confirm the iPhone iOS version.
+- [ ] Complete the one-time SideStore setup from macOS; iOS 26.7.2 is confirmed.
 - [x] Product, design, UX, copy, setup, review response and decision records.
 - [x] Scaffold `project.yml` (XcodeGen), one app target, one test target, theme and app
       shell.
@@ -75,7 +75,8 @@ the iPhone mic; exports JSON; no network calls; no persisted audio.
 - [x] GitHub Actions: `xcodegen`, `xcodebuild test` on the Simulator, unsigned IPA build
       with `-derivedDataPath build` and `-destination 'generic/platform=iOS'`; release
       `native-latest`. Unit tests run in CI with a timeout.
-- [ ] Install through SideStore; run the self-test on the iPhone.
+- [ ] Install through SideStore; run the self-test on the iPhone and record it at
+      <https://voccov.github.io/soniccare-pro/selftest.html>.
 - [ ] Design proof: connection, measurement and report screens with real tokens.
 - [ ] Capture Simulator screenshots (dark, large Dynamic Type, small and large iPhone).
 - [ ] Go/no-go review.
@@ -165,7 +166,8 @@ High-value automation first:
 - Phase 0A PWA validation track: done; it is the hard gate for the native MVP.
 - Public GitHub repo: done; no secrets or personal data.
 - iPhone: iOS 26.7.2 confirmed.
-- SideStore: one-time Linux + USB install pending; Linux distribution still unknown.
+- SideStore: one-time macOS + USB install pending; the Mac, iPhone and cable are
+  available. iOS 26.7.2 confirmed.
 - Owner-only or shareable later. Assumed owner-first.
 
 ## Links

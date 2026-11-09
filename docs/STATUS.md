@@ -1,12 +1,14 @@
 # Status — SonicCare Pro
 
 **Version:** `0.1.0-dev.4`  
-**Phase:** 0A — PWA live; 0B native self-test built and audited; install pending  
-**Last updated:** 2026-11-05  
+**Phase:** 0A — PWA live; 0B native self-test built and audited; install from macOS pending  
+**Last updated:** 2026-11-09  
 **State:** PWA is live and working on the owner's AirPods. Native Phase 0B is built: an
-unsigned IPA on GitHub and an install page are ready. The self-test has not run on the
-iPhone yet. The left-ear diagnosis still needs one controlled repeat. The audit fixed the
-PWA's unverified-report path and the native PiP/route-change conflicts.
+unsigned IPA on GitHub and an install page are ready. The owner now has a macOS computer
+with the iPhone and a USB cable, so the SideStore blocker is a physical 20-minute step,
+not an unknown. The self-test has not run on the iPhone yet. The left-ear diagnosis still
+needs one controlled repeat. The audit fixed the PWA's unverified-report path and the
+native PiP/route-change conflicts.
 
 ## Done
 
@@ -51,12 +53,21 @@ PWA's unverified-report path and the native PiP/route-change conflicts.
   - headless Chromium PWA run with a synthetic two-tone microphone passed:
     scratch verified, both ears captured, JSON copied, report restored after reload;
   - the live dev.4 page was re-tested; legacy captures migrate to the new input schema.
+- macOS install path prepared:
+  - `docs/SETUP.md` rewritten for macOS + iloader (DMG v2.4.1 or `brew install --cask
+    iloader`), with iPhone trust, Developer Mode, LocalDevVPN and refresh steps;
+  - a phone self-test checklist at <https://voccov.github.io/soniccare-pro/selftest.html>
+    that copies a structured result, linked from the install page;
+  - the published IPA re-verified: 115,110 bytes, arm64, iOS 17+, `PiPGuide.mp4`
+    included, no app icon by design.
 
 ## Next actions
 
-1. Complete the one-time SideStore setup on the Linux PC.
+1. On the Mac: install SideStore with iloader (macOS DMG v2.4.1) using the spare Apple ID;
+   follow `docs/SETUP.md`.
 2. Install the native self-test from the install page.
-3. Run the native self-test: permission, HFP route, sample rate, live RMS, tone, haptics, PiP.
+3. Run the self-test and record it at
+   <https://voccov.github.io/soniccare-pro/selftest.html>; send the copied result.
 4. Run one more controlled left+right PWA pair at the same volume and distance.
 5. If the left stays at least 6 dB weaker, clean the **left mesh only**, wait 2 hours, and
    retest.
@@ -64,7 +75,7 @@ PWA's unverified-report path and the native PiP/route-change conflicts.
 
 ## Blockers
 
-- SideStore one-time Linux setup; Linux distribution still unknown.
+- SideStore install from the owner's Mac; the iPhone and USB cable are available.
 - Native self-test results.
 - Another controlled PWA pair for repeatability.
 
@@ -82,11 +93,14 @@ PWA's unverified-report path and the native PiP/route-change conflicts.
 
 - Repo: <https://github.com/voccov/soniccare-pro>
 - PWA: <https://voccov.github.io/soniccare-pro/>
+- Self-test checklist: <https://voccov.github.io/soniccare-pro/selftest.html>
 - Data: left −8.1 dB SVR, right −0.95 dB SVR; left suspect; both mics live.
 - Scratch: left +37.0 dB delta / +18.2 dB ratio; right +28.3 dB delta / +10.4 dB ratio.
 - Plan/version checks pass for `0.1.0-dev.4`.
 - Native CI: <https://github.com/voccov/soniccare-pro/actions/runs/42077740655> — unit
   tests on the Simulator, unsigned device IPA, release asset 115,110 bytes.
+- IPA re-checked 2026-11-09: `com.soniccarepro.app`, build 1, iOS 17.0+, arm64, iPhone
+  only, `PiPGuide.mp4` bundled, microphone usage string present, no app icon by design.
 
 ## Do not forget
 
