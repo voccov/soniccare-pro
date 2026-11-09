@@ -18,6 +18,8 @@ semver.
   `README.md` now point at the macOS install step and the self-test checklist.
 - `docs/SETUP.md` notes that Tailscale cannot replace LocalDevVPN, that iOS keeps one VPN
   active at a time, and the iOS 26.4+ remote-pairing workaround.
+- `docs/SETUP.md` documents the SideStore `-80045` sign-in workaround and the iloader
+  direct-IPA fallback for the self-test build.
 - The published IPA was re-verified: arm64, iOS 17+, iPhone only, `PiPGuide.mp4`
   bundled, 115,110 bytes.
 
