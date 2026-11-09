@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SonicCare Pro — Phase 1 interactive mockup</title>
+<style>
+  :root {
+    --app-bg: #070709;
+    --app-surface: #131419;
+    --app-raised: #1B1C22;
+    --app-line: rgba(255, 255, 255, .08);
+    --app-line-strong: rgba(255, 255, 255, .14);
+    --app-text: #F5F5F7;
+    --app-muted: #A1A1AA;
+    --app-tertiary: #8E8E93;
+    --app-accent: #0A84FF;
+    --app-good: #30D158;
+    --app-warn: #FF9F0A;
+    --app-bad: #FF453A;
+    --app-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --app-rounded: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --app-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: var(--app-font); background: transparent; }
+  .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+  .icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .stage { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 0 4px; }
+  .caption { margin: 0; color: var(--muted-foreground, #8E8E93); font-size: 11px; letter-spacing: .02em; }
+  .phone {
+    position: relative; width: min(390px, 100%); height: 760px;
+    background: var(--app-bg); color: var(--app-text);
+    border: 1px solid #2a2b33; border-radius: 46px; overflow: hidden;
+    display: flex; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+  }
+  .statusbar {
+    height: 46px; flex: none; display: flex; align-items: flex-end; justify-content: space-between;
+    padding: 0 26px 6px; color: var(--app-text); font-size: 12px; font-weight: 600;
+  }
+  .sysicons { display: flex; align-items: center; gap: 5px; }
+  .sysicons svg { height: 11px; width: auto; fill: currentColor; }
+  .island { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 112px; height: 30px; background: #000; border-radius: 20px; z-index: 5; }
+  .progress { flex: none; display: flex; gap: 5px; padding: 0 20px 10px; }
+  .seg { height: 3px; flex: 1; border: 0; border-radius: 2px; background: var(--app-line-strong); padding: 0; cursor: pointer; }
+  .seg.done { background: var(--app-muted); }
+  .seg.active { background: var(--app-accent); }
+  .screens { flex: 1; min-height: 0; position: relative; }
+  .screen {
+    position: absolute; inset: 0; overflow-y: auto; padding: 2px 20px 22px;
+    display: none; flex-direction: column; gap: 14px;
+    scrollbar-width: thin; scrollbar-color: var(--app-line-strong) transparent;
+  }
+  .screen.active { display: flex; animation: screenIn .28s ease; }
+  @keyframes screenIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .bottom {
+    flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 20px 16px; border-top: 1px solid var(--app-line); background: var(--app-bg);
+  }
+  .bottom .primary { flex: 1; max-width: 230px; }
+  .stepmeta { display: flex; justify-content: space-between; gap: 10px; padding-top: 4px; }
+  .micro { font-family: var(--app-mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--app-tertiary); font-weight: 600; }
+  h1 { margin: 0; font-family: var(--app-rounded); font-size: 30px; line-height: 1.08; letter-spacing: -.03em; font-weight: 650; }
+  h2 { margin: 0; font-size: 21px; line-height: 1.2; letter-spacing: -.02em; }
+  .lede { margin: 0; color: var(--app-muted); font-size: 15px; line-height: 1.4; }
+  .note { margin: 0; color: var(--app-tertiary); font-size: 11.5px; line-height: 1.4; }
+  .small { margin: 0; color: var(--app-muted); font-size: 13.5px; line-height: 1.4; }
+  .card { background: var(--app-surface); border: 1px solid var(--app-line); border-top-color: var(--app-line-strong); border-radius: 18px; padding: 16px; }
+  .primary, .secondary, .linkbtn, .choice, .seg { font: inherit; cursor: pointer; touch-action: manipulation; }
+  .primary {
+    min-height: 52px; padding: 0 18px; border: 0; border-radius: 12px;
+    background: var(--app-accent); color: #fff; font-size: 17px; font-weight: 650;
+  }
+  .primary:disabled { opacity: .4; cursor: not-allowed; }
+  .secondary {
+    min-height: 48px; padding: 0 16px; border: 1px solid var(--app-line-strong);
+    border-radius: 12px; background: transparent; color: var(--app-text); font-size: 15px; font-weight: 600;
+  }
+  .linkbtn { min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--app-tertiary); font-size: 13px; }
+  .linkbtn:disabled { opacity: .35; cursor: not-allowed; }
+  .screen > .linkbtn { align-self: flex-start; }
+  .wide { width: 100%; }
+  :focus-visible { outline: 2px solid var(--app-accent); outline-offset: 3px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px; min-height: 24px; padding: 3px 9px;
+    border-radius: 999px; border: 1px solid var(--app-line-strong);
+    font-family: var(--app-mono); font-size: 10px; letter-spacing: .03em; color: var(--app-muted); white-space: nowrap;
+  }
+  .badge.good { color: var(--app-good); border-color: rgba(48,209,88,.35); background: rgba(48,209,88,.08); }
+  .badge.warn { color: var(--app-warn); border-color: rgba(255,159,10,.35); background: rgba(255,159,10,.08); }
+  .badge.bad { color: var(--app-bad); border-color: rgba(255,69,58,.35); background: rgba(255,69,58,.08); }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--app-tertiary); flex: none; }
+  .dot.good { background: var(--app-good); }
+  .dot.warn { background: var(--app-warn); }
+  .disclosure { border-top: 1px solid var(--app-line); padding-top: 10px; }
+  .disclosure summary { cursor: pointer; color: var(--app-muted); font-size: 13px; font-weight: 550; }
+  .disclosure p { margin: 8px 0 0; color: var(--app-tertiary); font-size: 12.5px; line-height: 1.45; }
+
+  .hero { display: grid; place-items: center; height: 178px; }
+  .hero-svg { width: 100%; max-width: 320px; height: 178px; }
+  .hero-svg .head { fill: var(--app-surface); stroke: var(--app-line-strong); stroke-width: 1.5; }
+  .hero-svg .ear { fill: none; stroke: var(--app-line-strong); stroke-width: 2; }
+  .hero-svg .ear.accent { stroke: var(--app-accent); }
+  .hero-svg .case { fill: var(--app-raised); stroke: var(--app-line-strong); }
+  .hero-svg .case-lid { fill: var(--app-surface); stroke: var(--app-line-strong); transform-origin: 18px 102px; transform: rotate(-18deg); }
+  .hero-svg .case-led { fill: var(--app-good); }
+  .hero-svg .bud ellipse, .hero-svg .bud rect { fill: var(--app-surface); stroke: var(--app-line-strong); stroke-width: 1.5; }
+  .hero-svg .bud .ring { fill: none; stroke: var(--app-accent); stroke-width: 1.5; }
+  .hero-svg .bud-ear ellipse, .hero-svg .bud-ear rect { fill: var(--app-raised); stroke: var(--app-accent); stroke-width: 1.5; }
+  .hero-svg .flow { fill: none; stroke: var(--app-line-strong); stroke-width: 1.5; stroke-dasharray: 3 4; }
+  .hero-svg .flowhead { fill: none; stroke: var(--app-line-strong); stroke-width: 1.5; }
+  .hero-svg .waves path { fill: none; stroke: var(--app-accent); stroke-width: 1.5; opacity: 0; transform-origin: 200px 108px; }
+  .screen.active .bud-left { animation: lift .8s .1s both; }
+  .screen.active .bud-right { animation: lift .8s .18s both; }
+  .screen.active .bud-ear { animation: pop .7s .3s both; }
+  .screen.active .case-lid { animation: lidopen .8s ease both; }
+  .screen.active .waves path { animation: wave 1.4s .4s ease-out; }
+  @keyframes lift { from { transform: translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes pop { from { transform: scale(.85); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes lidopen { from { transform: rotate(0); } to { transform: rotate(-18deg); } }
+  @keyframes wave { 0% { opacity: 0; transform: scale(.85); } 35% { opacity: .75; } 100% { opacity: 0; transform: scale(1.12); } }
+
+  .checkcard { padding: 4px 14px; }
+  .check-row {
+    display: flex; align-items: center; gap: 12px; width: 100%; min-height: 64px;
+    padding: 10px 0; border: 0; border-top: 1px solid var(--app-line);
+    background: transparent; color: var(--app-text); text-align: left;
+  }
+  .check-row:first-child { border-top: 0; }
+  .checkbox {
+    width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--app-line-strong);
+    flex: none; display: grid; place-items: center; color: transparent;
+  }
+  .check-row[aria-pressed="true"] .checkbox { background: var(--app-accent); border-color: var(--app-accent); color: #fff; }
+  .checkbox svg { width: 14px; height: 14px; }
+  .checktext { display: grid; gap: 2px; flex: 1; }
+  .checktext strong { font-size: 15px; font-weight: 600; }
+  .checktext em { font-style: normal; color: var(--app-tertiary); font-size: 12.5px; line-height: 1.35; }
+
+  .statusrow { display: flex; align-items: center; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid var(--app-line); font-size: 14px; font-weight: 550; }
+  .statusrow .badge { margin-left: auto; }
+  .rows { display: grid; margin-top: 2px; }
+  .row { display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-top: 1px solid var(--app-line); font-size: 14px; }
+  .row:first-child { border-top: 0; }
+  .row > span:first-child { color: var(--app-muted); }
+  .value { color: var(--app-text); font-weight: 550; text-align: right; }
+  .mono { font-family: var(--app-mono); font-variant-numeric: tabular-nums; }
+  .goodtext { color: var(--app-good); }
+
+  .earhero { height: 168px; display: grid; place-items: center; }
+  .earhero svg { width: 100%; max-width: 320px; height: 168px; }
+  .earhero .head { fill: var(--app-surface); stroke: var(--app-line-strong); }
+  .earhero .ear { fill: none; stroke: var(--app-line-strong); stroke-width: 2; }
+  .earhero .ear.left { stroke: var(--app-accent); }
+  .earhero .pingbud ellipse, .earhero .pingbud rect { fill: var(--app-raised); stroke: var(--app-accent); stroke-width: 1.5; }
+  .earhero .waves path { fill: none; stroke: var(--app-accent); stroke-width: 2; opacity: 0; transform-origin: 84px 110px; }
+  .earhero.pinging .waves path { animation: wave 1.35s ease-out; }
+  @keyframes wave { 0% { opacity: 0; transform: scale(.85); } 35% { opacity: .75; } 100% { opacity: 0; transform: scale(1.12); } }
+  .choices { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .choice { min-height: 44px; border: 1px solid var(--app-line-strong); border-radius: 10px; background: transparent; color: var(--app-muted); font-size: 13px; font-weight: 600; }
+  .choice[aria-pressed="true"] { background: var(--app-raised); color: var(--app-text); border-color: var(--app-accent); }
+  .feedback { min-height: 20px; font-size: 12.5px; line-height: 1.4; color: var(--app-tertiary); }
+  .feedback.success { color: var(--app-good); }
+  .feedback.warning { color: var(--app-warn); }
+
+  .pathlist { list-style: none; margin: 0; padding: 0; display: grid; }
+  .pathlist li { display: flex; gap: 12px; padding: 11px 0; border-top: 1px solid var(--app-line); }
+  .pathlist li:first-child { border-top: 0; }
+  .num { width: 24px; height: 24px; border-radius: 8px; border: 1px solid var(--app-line-strong); display: grid; place-items: center; font-family: var(--app-mono); font-size: 11px; color: var(--app-accent); flex: none; }
+  .pathlist strong { display: block; font-size: 14px; font-weight: 600; }
+  .pathlist em { display: block; font-style: normal; color: var(--app-tertiary); font-size: 12px; line-height: 1.35; margin-top: 2px; }
+  .scratchcard { display: grid; gap: 8px; margin-top: 10px; }
+  .cardtitle { font-size: 15px; font-weight: 650; }
+  .scratchart { height: 110px; display: grid; place-items: center; }
+  .scratchart svg { width: 230px; height: 110px; }
+  .scratchart .earbud ellipse, .scratchart .earbud rect { fill: var(--app-surface); stroke: var(--app-line-strong); }
+  .scratchart .nail { fill: var(--app-raised); stroke: var(--app-line-strong); }
+  .scratchart .silver { fill: none; stroke: var(--app-accent); stroke-width: 2; }
+  .scratchart .scratchline { fill: none; stroke: var(--app-accent); stroke-width: 2; stroke-dasharray: 4 5; opacity: 0; }
+  .scratchcard.scratching .scratchline { opacity: 1; animation: scratchmove .45s linear infinite; }
+  .scratchcard.scratching .silver { animation: ringpulse .3s ease-in-out infinite; }
+  @keyframes scratchmove { to { stroke-dashoffset: -18; } }
+  @keyframes ringpulse { 50% { stroke-width: 4; } }
+  .mini-meter { display: flex; align-items: flex-end; gap: 2px; height: 26px; }
+  .mini-meter span { flex: 1; height: 6px; background: var(--app-line-strong); border-radius: 1px; transition: height .08s linear; }
+  .scratchcard.scratching .mini-meter span { background: var(--app-accent); }
+
+  .earstrip { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .earstrip .earcard { background: var(--app-surface); border: 1px solid var(--app-line); border-radius: 14px; padding: 10px 12px; display: grid; gap: 2px; }
+  .earstrip .earcard.active { border-color: rgba(10,132,255,.45); background: rgba(10,132,255,.06); }
+  .earstrip .earcard.done { border-color: rgba(48,209,88,.32); }
+  .earstrip .earcard.done strong { color: var(--app-good); }
+  .earstrip strong { font-size: 14px; }
+  .switchcard { display: grid; gap: 8px; padding: 14px; }
+  .switchsummary { display: flex; align-items: center; gap: 8px; padding: 12px 14px; font-size: 14px; font-weight: 550; }
+  .switchsummary .badge { margin-left: auto; }
+  .measure.switching .ringwrap,
+  .measure.switching .spectrum,
+  .measure.switching .phasechip,
+  .measure.switching #prompt,
+  .measure.switching #measureHint,
+  .measure.switching #holdBtn,
+  .measure.switching #seeResult { display: none; }
+  .ringwrap { position: relative; width: 250px; height: 250px; margin: 2px auto 0; }
+  .ring { width: 250px; height: 250px; display: block; }
+  .ring circle { fill: none; stroke-width: 9; }
+  .ring .track { stroke: var(--app-line); }
+  .ring .target { stroke: var(--app-good); opacity: .25; stroke-linecap: round; stroke-dasharray: 202 376; stroke-dashoffset: -202; }
+  .ring .live { stroke: var(--app-accent); stroke-linecap: round; stroke-dasharray: 578; stroke-dashoffset: 578; transition: stroke-dashoffset .12s linear; }
+  .ringcenter { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #dbValue { font-family: var(--app-mono); font-size: 38px; font-weight: 600; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+  .ringcenter .unit { font-family: var(--app-mono); font-size: 12px; color: var(--app-tertiary); }
+  .ringcenter .ringlabel { margin-top: 6px; font-family: var(--app-mono); font-size: 9.5px; letter-spacing: .12em; color: var(--app-tertiary); }
+  .spectrum { display: flex; align-items: flex-end; gap: 2px; height: 42px; padding: 0 2px; }
+  .spectrum span { flex: 1; height: 6%; background: var(--app-accent); opacity: .7; border-radius: 1px; transition: height .08s linear; }
+  .phasechip { align-self: flex-start; font-family: var(--app-mono); font-size: 10px; letter-spacing: .08em; color: var(--app-tertiary); border: 1px solid var(--app-line); border-radius: 999px; padding: 4px 9px; }
+  .measure .primary { width: 100%; }
+  .measurefoot { display: flex; justify-content: space-between; gap: 8px; color: var(--app-tertiary); font-size: 11px; }
+
+  .earcards { display: grid; gap: 8px; }
+  .earcard.result { border: 1px solid var(--app-line); border-radius: 14px; padding: 12px; background: var(--app-surface); display: grid; gap: 6px; }
+  .earcard.suspect { border-color: rgba(255,159,10,.4); }
+  .earhead { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .svr { font-family: var(--app-mono); font-size: 26px; font-weight: 600; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+  .svr span { font-size: 10px; color: var(--app-tertiary); letter-spacing: .04em; }
+  .confidence { color: var(--app-tertiary); font-size: 11px; }
+  .chartcard { padding: 10px 14px; }
+  .charthead { display: flex; justify-content: space-between; align-items: center; }
+  .chartcard svg { width: 100%; height: 88px; display: block; margin: 4px 0; }
+  .chartlegend { display: flex; gap: 12px; color: var(--app-tertiary); font-size: 11px; }
+  .chartlegend i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; }
+
+  .safety { border: 1px solid rgba(255,159,10,.35); background: rgba(255,159,10,.07); color: var(--app-warn); border-radius: 12px; padding: 12px 14px; font-size: 12.5px; line-height: 1.4; }
+  .recoveryart { height: 112px; display: grid; place-items: center; }
+  .recoveryart svg { width: 230px; height: 108px; }
+  .recoveryart .bud ellipse, .recoveryart .bud rect { fill: var(--app-surface); stroke: var(--app-line-strong); }
+  .recoveryart .mesh { fill: none; stroke: var(--app-warn); stroke-width: 2; }
+  .recoveryart .table { stroke: var(--app-line-strong); stroke-width: 2; }
+  .recoveryart .brush { stroke: var(--app-muted); stroke-width: 2; }
+  .timer { display: grid; gap: 10px; }
+  .timerhead { display: flex; justify-content: space-between; align-items: center; }
+  .timerbar { height: 4px; background: var(--app-line); border-radius: 2px; overflow: hidden; }
+  .timerbar span { display: block; height: 100%; width: 0; background: var(--app-accent); transition: width .3s ease; }
+  .timer.running .timerbar span { width: 6%; }
+  .timer .linkbtn { justify-self: start; }
+  .finish { border: 1px solid rgba(48,209,88,.35); background: rgba(48,209,88,.07); border-radius: 14px; padding: 14px; display: grid; gap: 4px; }
+  .finish strong { color: var(--app-good); font-size: 15px; }
+  [hidden] { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+<svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-bt" viewBox="0 0 24 24"><path d="m7 7 10 10-5 5V2l5 5L7 17"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+  <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5zM15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="m6 3 14 9-14 9V3z"/></symbol>
+  <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></symbol>
+</svg>
+
+<div class="stage">
+  <div class="phone" id="phone">
+    <div class="statusbar">
+      <span>9:41</span>
+      <span class="sysicons" aria-hidden="true">
+        <svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+        <svg viewBox="0 0 18 12"><path d="M1 5.5a12 12 0 0 1 16 0M4 8a7.5 7.5 0 0 1 10 0M7 10.5a3 3 0 0 1 4 0"/></svg>
+        <svg viewBox="0 0 24 12"><rect x="1" y="2" width="19" height="8" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="3" y="4" width="12" height="4" rx="1"/><rect x="21" y="4.5" width="2" height="3" rx="1"/></svg>
+      </span>
+    </div>
+    <div class="island" aria-hidden="true"></div>
+
+    <div class="progress" id="progress" aria-label="Steps">
+      <button class="seg active" aria-label="Step 1, ready"></button>
+      <button class="seg" aria-label="Step 2, connection"></button>
+      <button class="seg" aria-label="Step 3, ear check"></button>
+      <button class="seg" aria-label="Step 4, microphone"></button>
+      <button class="seg" aria-label="Step 5, measure"></button>
+      <button class="seg" aria-label="Step 6, result"></button>
+      <button class="seg" aria-label="Step 7, clean and retest"></button>
+    </div>
+
+    <div class="screens">
+      <!-- 1. READY -->
+      <section class="screen active" data-step="0">
+        <div class="stepmeta"><span class="micro">Step 1 of 7</span><span class="micro">Ready</span></div>
+        <h1>Check your AirPods</h1>
+        <p class="lede">A guided check for muffled or uneven sound. We test each earbud and show you what we found.</p>
+        <div class="hero" aria-hidden="true">
+          <svg class="hero-svg" viewBox="0 0 320 180">
+            <rect class="case" x="18" y="100" width="92" height="42" rx="14"/>
+            <rect class="case-lid" x="18" y="86" width="92" height="16" rx="8"/>
+            <circle class="case-led" cx="64" cy="122" r="3"/>
+            <g class="bud bud-left">
+              <ellipse cx="48" cy="92" rx="12" ry="15"/>
+              <rect x="43" y="102" width="10" height="24" rx="5"/>
+              <circle class="ring" cx="48" cy="122" r="3.5"/>
+            </g>
+            <g class="bud bud-right">
+              <ellipse cx="80" cy="92" rx="12" ry="15"/>
+              <rect x="75" y="102" width="10" height="24" rx="5"/>
+              <circle class="ring" cx="80" cy="122" r="3.5"/>
+            </g>
+            <path class="flow" d="M124 120h42"/>
+            <path class="flowhead" d="m160 114 8 6-8 6"/>
+            <path class="head" d="M206 94c0-38 27-64 60-64s58 26 58 62c0 34-24 58-54 60-14 1-26-4-34-12"/>
+            <path class="ear accent" d="M212 92c-12 0-18 9-18 22 0 15 8 25 20 29"/>
+            <g class="bud bud-ear">
+              <ellipse cx="212" cy="94" rx="9" ry="12"/>
+              <rect x="207.5" y="104" width="9" height="22" rx="4.5"/>
+            </g>
+            <g class="waves">
+              <path d="M190 88c-7 5-11 13-11 21s4 16 11 21"/>
+              <path d="M181 78c-11 8-17 19-17 31s6 23 17 31"/>
+            </g>
+          </svg>
+        </div>
+        <div class="card checkcard">
+          <button class="check-row" data-check="inEars" aria-pressed="false">
+            <span class="checkbox"><svg class="icon"><use href="#i-check"/></svg></span>
+            <span class="checktext"><strong>Both earbuds in</strong><em>Take them out of the case and put them in.</em></span>
+          </button>
+          <button class="check-row" data-check="fit" aria-pressed="false">
+            <span class="checkbox"><svg class="icon"><use href="#i-check"/></svg></span>
+            <span class="checktext"><strong>Ear Tip Fit Test</strong><em>Settings → Bluetooth → (i) → Ear Tip Fit Test.</em></span>
+          </button>
+          <button class="check-row" data-check="quiet" aria-pressed="false">
+            <span class="checkbox"><svg class="icon"><use href="#i-check"/></svg></span>
+            <span class="checktext"><strong>Quiet room</strong><em>No fans, traffic or TV.</em></span>
+          </button>
+          <button class="check-row" data-check="volume" aria-pressed="false">
+            <span class="checkbox"><svg class="icon"><use href="#i-check"/></svg></span>
+            <span class="checktext"><strong>Volume low</strong><em>Start at one or two bars. You can raise it later.</em></span>
+          </button>
+        </div>
+        <details class="disclosure">
+          <summary>Why the fit test matters</summary>
+          <p>A loose tip can look like high-frequency loss. Run Apple's Ear Tip Fit Test first, then confirm the seal here.</p>
+        </details>
+        <p class="note">The app cannot sense whether the earbuds are in. You confirm each step; skipped steps show as Not tested.</p>
+      </section>
+
+      <!-- 2. CONNECTION -->
+      <section class="screen" data-step="1">
+        <div class="stepmeta"><span class="micro">Step 2 of 7</span><span class="micro">Connection</span></div>
+        <h1>Connection</h1>
+        <p class="lede">iOS is using your AirPods. The input rate is reported by the audio engine.</p>
+        <div class="card">
+          <div class="statusrow"><span class="dot good"></span><span>AirPods Pro · Connected</span><span class="badge good">HFP</span></div>
+          <div class="rows">
+            <div class="row"><span>Microphone access</span><span class="value goodtext">Granted</span></div>
+            <div class="row"><span>Route</span><span class="value">Bluetooth HFP</span></div>
+            <div class="row"><span>Input rate</span><span class="value mono">48 kHz</span></div>
+            <div class="row"><span>Device</span><span class="value">AirPods Pro</span></div>
+          </div>
+        </div>
+        <details class="disclosure">
+          <summary>Why 48 kHz is not the whole story</summary>
+          <p>The engine can report 48 kHz while the Bluetooth speech link is narrower. The app checks the usable high band from the signal itself, not from this number alone.</p>
+        </details>
+        <p class="note">If the route is Built-in Mic, reconnect the AirPods, then return here.</p>
+      </section>
+
+      <!-- 3. EAR CHECK -->
+      <section class="screen" data-step="2">
+        <div class="stepmeta"><span class="micro">Step 3 of 7</span><span class="micro">Ear check</span></div>
+        <h1>Which ear?</h1>
+        <p class="lede">We play a short ping in one earbud before the microphone starts. This catches swapped earbuds.</p>
+        <div class="earhero" id="earhero" aria-hidden="true">
+          <svg viewBox="0 0 320 168">
+            <path class="head" d="M160 20c-46 0-76 30-76 68 0 32 20 56 44 68h64c24-12 44-36 44-68 0-38-30-68-76-68Z"/>
+            <path class="ear left" d="M84 82c-14 0-22 10-22 24 0 16 8 27 22 30"/>
+            <path class="ear" d="M236 82c14 0 22 10 22 24 0 16-8 27-22 30"/>
+            <g class="pingbud">
+              <ellipse cx="84" cy="92" rx="11" ry="14"/>
+              <rect x="79" y="103" width="10" height="24" rx="5"/>
+            </g>
+            <g class="waves">
+              <path d="M58 86c-8 6-12 14-12 22s4 16 12 22"/>
+              <path d="M48 76c-12 9-18 21-18 32s6 23 18 32"/>
+            </g>
+          </svg>
+        </div>
+        <button id="playPing" class="secondary wide">Play left ping</button>
+        <div id="earChoices" class="choices" hidden>
+          <button class="choice" data-ear="left" aria-pressed="false">Left</button>
+          <button class="choice" data-ear="right" aria-pressed="false">Right</button>
+          <button class="choice" data-ear="both" aria-pressed="false">Both</button>
+          <button class="choice" data-ear="neither" aria-pressed="false">Neither</button>
+        </div>
+        <div id="earFeedback" class="feedback" role="status" aria-live="polite"></div>
+        <button id="skipEar" class="linkbtn">Skip ear check</button>
+        <p class="note">No microphone is used on this step. The ping never becomes a per-ear result.</p>
+      </section>
+
+      <!-- 4. MICROPHONE -->
+      <section class="screen" data-step="3">
+        <div class="stepmeta"><span class="micro">Step 4 of 7</span><span class="micro">Microphone</span></div>
+        <h1>Set the microphone to Left</h1>
+        <p class="lede">Open Settings, tap your AirPods, then Microphone, then Always Left.</p>
+        <div class="card" id="settingsCard">
+          <ol class="pathlist">
+            <li><span class="num">1</span><span><strong>Settings</strong><em>Open the iPhone Settings app.</em></span></li>
+            <li><span class="num">2</span><span><strong>Bluetooth</strong><em>Tap the (i) next to your AirPods.</em></span></li>
+            <li><span class="num">3</span><span><strong>Microphone</strong><em>Choose Always Left.</em></span></li>
+          </ol>
+          <button id="iveSet" class="secondary wide" style="margin-top:10px">I've set it to Left</button>
+        </div>
+        <div class="card scratchcard" id="scratchCard" hidden>
+          <div class="cardtitle">Confirm the microphone</div>
+          <div class="scratchart" aria-hidden="true">
+            <svg viewBox="0 0 230 110">
+              <g class="earbud">
+                <ellipse cx="86" cy="38" rx="24" ry="30"/>
+                <rect x="76" y="56" width="20" height="42" rx="10"/>
+                <circle class="silver" cx="86" cy="90" r="7"/>
+              </g>
+              <path class="nail" d="M146 44c9 4 13 12 11 21-2 8-9 13-17 12"/>
+              <path class="scratchline" d="M112 92c14-7 25-7 37 0"/>
+            </svg>
+          </div>
+          <p class="small">Lightly scratch the bottom silver ring with a fingernail for one second. Do not tap the stem.</p>
+          <div class="mini-meter" id="miniMeter" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <button id="scratchBtn" class="secondary wide">Start scratch check</button>
+          <div id="scratchFeedback" class="feedback" role="status" aria-live="polite"></div>
+        </div>
+        <button id="skipMic" class="linkbtn">Skip side check</button>
+        <p class="note">Bluetooth sends one microphone at a time. This confirms the left microphone; we test the right after.</p>
+      </section>
+
+      <!-- 5. MEASURE -->
+      <section class="screen measure" data-step="4">
+        <div class="stepmeta"><span class="micro">Step 5 of 7</span><span class="micro">Measure</span></div>
+        <div class="earstrip">
+          <div class="earcard active" id="leftEar"><span class="micro">Left mic</span><strong>Live</strong></div>
+          <div class="earcard" id="rightEar"><span class="micro">Right mic</span><strong>Next</strong></div>
+        </div>
+        <div class="card switchsummary" id="switchSummary" hidden>
+          <span class="dot good"></span><span>Left ear captured</span><span class="badge good">−19.1 dB</span>
+        </div>
+        <div class="ringwrap">
+          <svg class="ring" viewBox="0 0 250 250" aria-hidden="true">
+            <circle class="track" cx="125" cy="125" r="92"/>
+            <circle class="target" cx="125" cy="125" r="92" transform="rotate(-90 125 125)"/>
+            <circle class="live" cx="125" cy="125" r="92" transform="rotate(-90 125 125)"/>
+          </svg>
+          <div class="ringcenter">
+            <span id="dbValue">—</span>
+            <span class="unit">dB</span>
+            <span class="ringlabel" id="ringLabel">READY</span>
+          </div>
+        </div>
+        <div class="spectrum" id="spectrum" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="phasechip" id="phaseChip">LEFT · PHASE A · 150–800 Hz</div>
+        <h2 id="prompt">Say "Ahhh" for three seconds</h2>
+        <p class="small" id="measureHint">Hold a steady, comfortable voice. We listen to one microphone at a time.</p>
+        <button id="holdBtn" class="primary">Start hold</button>
+        <button id="seeResult" class="primary" hidden>See result</button>
+        <div class="card switchcard" id="switchEar" hidden>
+          <div class="cardtitle">Now the right ear</div>
+          <p class="small">Switch the microphone to Right in Settings, then confirm the right ear.</p>
+          <p class="small mono" style="color:var(--app-tertiary);font-size:11.5px">Settings → Bluetooth → (i) → Microphone → Always Right</p>
+          <p class="note">The left ear is saved. The right ear repeats the same two sounds.</p>
+          <button id="confirmRight" class="primary wide" style="margin-top:4px">Confirm right microphone</button>
+          <div id="rightFeedback" class="feedback" role="status" aria-live="polite"></div>
+        </div>
+        <div class="measurefoot"><span>Both earbuds stay in.</span><span class="mono" id="sideRead">LEFT · —</span></div>
+      </section>
+
+      <!-- 6. RESULT -->
+      <section class="screen" data-step="5">
+        <div class="stepmeta"><span class="micro">Step 6 of 7</span><span class="micro">Result</span></div>
+        <span class="badge warn" style="align-self:flex-start">Example result</span>
+        <h1>Right microphone has high-frequency loss</h1>
+        <p class="lede">The right microphone loses 12.4 dB in the high frequencies (3–6.5 kHz). This can happen when the mesh is blocked.</p>
+        <div class="earcards">
+          <div class="earcard result">
+            <div class="earhead"><span class="micro">Left</span><span class="badge good">Balanced</span></div>
+            <div class="svr">−1.2 <span>dB SVR</span></div>
+            <div class="confidence">Confidence: High</div>
+          </div>
+          <div class="earcard result suspect">
+            <div class="earhead"><span class="micro">Right</span><span class="badge warn">High-frequency loss</span></div>
+            <div class="svr">−12.4 <span>dB SVR</span></div>
+            <div class="confidence">Confidence: Medium</div>
+          </div>
+        </div>
+        <div class="card chartcard">
+          <div class="charthead"><span class="micro">Spectral difference</span><span class="micro">Example</span></div>
+          <svg viewBox="0 0 320 108" aria-hidden="true">
+            <rect x="186" y="8" width="96" height="82" fill="rgba(255,159,10,.07)"/>
+            <path d="M24 18v72M24 90h272" stroke="rgba(255,255,255,.12)" stroke-width="1"/>
+            <path d="M24 54h272" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+            <path d="M186 18v72M282 18v72" stroke="rgba(255,159,10,.25)" stroke-width="1" stroke-dasharray="3 4"/>
+            <path d="M24 48c26-4 48-6 72-3s44 5 68 2 42-3 60 0 34 3 52 2" fill="none" stroke="#30D158" stroke-width="2"/>
+            <path d="M24 50c26-1 48 0 72 3s44 6 68 9 42 10 60 18 34 14 52 20" fill="none" stroke="#FF9F0A" stroke-width="2"/>
+          </svg>
+          <div class="chartlegend"><span><i style="background:#30D158"></i>Left</span><span><i style="background:#FF9F0A"></i>Right</span></div>
+        </div>
+        <details class="disclosure">
+          <summary>What SVR means</summary>
+          <p>SVR compares the high-frequency "Ssss" band (3–6.5 kHz) with the low-frequency "Ahhh" band (150–800 Hz). A lower value means less high-frequency energy in that microphone.</p>
+        </details>
+        <details class="disclosure">
+          <summary>What we measured</summary>
+          <p>Left and right SVR, the high-frequency difference, and the active input route. These are example values for this mockup.</p>
+        </details>
+        <details class="disclosure">
+          <summary>What we didn't measure</summary>
+          <p>Absolute sound pressure, firmware, serial, battery, or a hardware fault. This is a check, not a diagnosis.</p>
+        </details>
+        <button id="testAgain" class="secondary wide">Test again</button>
+        <button id="saveResult" class="secondary wide">Save result</button>
+        <p id="saveNote" class="feedback success" hidden>Saved on this iPhone.</p>
+      </section>
+
+      <!-- 7. RECOVERY -->
+      <section class="screen" data-step="6">
+        <div class="stepmeta"><span class="micro">Step 7 of 7</span><span class="micro">Clean and retest</span></div>
+        <h1>Clean the right mesh</h1>
+        <div class="safety">Use Apple's method: micellar water and a soft children's toothbrush. No liquids in the openings, no compressed air, no sharp tools.</div>
+        <div class="recoveryart" aria-hidden="true">
+          <svg viewBox="0 0 230 108">
+            <path class="table" d="M18 92h194"/>
+            <g class="bud">
+              <ellipse cx="104" cy="54" rx="26" ry="22"/>
+              <rect x="94" y="60" width="20" height="30" rx="10"/>
+            </g>
+            <path class="mesh" d="M94 48c6-5 14-5 20 0"/>
+            <path class="brush" d="M150 36c10 6 16 18 14 30M150 36l-8-6M164 66l8 6"/>
+          </svg>
+        </div>
+        <div class="card">
+          <ol class="pathlist">
+            <li><span class="num">1</span><span><strong>Take the right earbud out</strong><em>Place it mesh-down on a clean table.</em></span></li>
+            <li><span class="num">2</span><span><strong>Brush the mesh</strong><em>Micellar water on a soft children's toothbrush. Light strokes only.</em></span></li>
+            <li><span class="num">3</span><span><strong>Dry for two hours</strong><em>Leave it out of the case, mesh-down, in a dry room.</em></span></li>
+            <li><span class="num">4</span><span><strong>Test again</strong><em>Compare the same ear with the baseline.</em></span></li>
+          </ol>
+        </div>
+        <div class="card timer" id="timerCard">
+          <div class="timerhead"><span class="micro">Dry timer</span><span class="mono" id="timerValue">2:00:00</span></div>
+          <div class="timerbar"><span></span></div>
+          <button id="startTimer" class="secondary wide">Start 2-hour timer</button>
+          <button id="demoUnlock" class="linkbtn" hidden>Demo: unlock test now</button>
+          <button id="retest" class="secondary wide" hidden>Test again</button>
+        </div>
+        <p class="note">Do not put the earbud back in until it is completely dry. No tone is played during cleaning.</p>
+        <div id="finish" class="finish" hidden>
+          <strong>Done.</strong>
+          <p class="small">Your result stays on this iPhone.</p>
+          <button id="startOver" class="linkbtn">Start over</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="bottom">
+      <button id="back" class="linkbtn" disabled>Back</button>
+      <button id="next" class="primary" disabled>Continue</button>
+    </div>
+  </div>
+  <p class="caption">Interactive mockup · example data · not a measurement</p>
+</div>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const app = {
+    step: 0,
+    ready: { inEars: false, fit: false, quiet: false, volume: false },
+    ear: { played: false, choice: null, skipped: false },
+    mic: { verified: false, skipped: false, busy: false },
+    measure: { side: 'left', phase: 0, captured: [false, false], busy: false, done: false },
+    finished: false
+  };
+  const screens = $$('.screen');
+  const segs = $$('.seg');
+  const next = $('#next');
+  const back = $('#back');
+
+  function canNext() {
+    switch (app.step) {
+      case 0: return Object.values(app.ready).every(Boolean);
+      case 1: return true;
+      case 2: return app.ear.choice === 'left' || app.ear.skipped;
+      case 3: return app.mic.verified || app.mic.skipped;
+      case 4: return app.measure.done;
+      case 5: return true;
+      case 6: return !app.finished;
+      default: return false;
+    }
+  }
+
+  function sync() {
+    screens.forEach((s, i) => {
+      const active = i === app.step;
+      s.classList.toggle('active', active);
+      if (active) s.scrollTop = 0;
+    });
+    segs.forEach((s, i) => {
+      s.classList.toggle('active', i === app.step);
+      s.classList.toggle('done', i < app.step);
+      s.setAttribute('aria-current', i === app.step ? 'step' : 'false');
+    });
+    back.disabled = app.step === 0;
+    next.hidden = app.step === 4;
+    next.disabled = !canNext();
+    next.textContent = app.step === 5 ? 'Clean the right mesh' : app.step === 6 ? 'Done' : 'Continue';
+  }
+
+  function go(step) {
+    app.step = Math.max(0, Math.min(6, step));
+    sync();
+  }
+
+  segs.forEach((s, i) => s.addEventListener('click', () => go(i)));
+  back.addEventListener('click', () => go(app.step - 1));
+  next.addEventListener('click', () => {
+    if (!canNext()) return;
+    if (app.step === 5) go(6);
+    else if (app.step === 6) finish();
+    else go(app.step + 1);
+  });
+
+  $$('.check-row').forEach(row => row.addEventListener('click', () => {
+    const key = row.dataset.check;
+    const on = row.getAttribute('aria-pressed') !== 'true';
+    row.setAttribute('aria-pressed', String(on));
+    app.ready[key] = on;
+    sync();
+  }));
+
+  const playPing = $('#playPing');
+  playPing.addEventListener('click', () => {
+    app.ear.played = true;
+    const hero = $('#earhero');
+    hero.classList.remove('pinging');
+    void hero.offsetWidth;
+    hero.classList.add('pinging');
+    $('#earChoices').hidden = false;
+    playPing.disabled = true;
+    setTimeout(() => { playPing.disabled = false; }, 1500);
+    sync();
+  });
+  $$('.choice').forEach(btn => btn.addEventListener('click', () => {
+    if (!app.ear.played) return;
+    app.ear.choice = btn.dataset.ear;
+    $$('.choice').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+    const fb = $('#earFeedback');
+    if (btn.dataset.ear === 'left') {
+      fb.className = 'feedback success';
+      fb.textContent = 'Left earbud confirmed.';
+    } else if (btn.dataset.ear === 'right') {
+      fb.className = 'feedback warning';
+      fb.textContent = 'The earbuds are swapped. Swap them, then play the left ping again.';
+    } else if (btn.dataset.ear === 'both') {
+      fb.className = 'feedback warning';
+      fb.textContent = 'You heard it in both ears. Check the fit and connection, then try again.';
+    } else {
+      fb.className = 'feedback warning';
+      fb.textContent = 'No tone. Check the connection, then try again.';
+    }
+    sync();
+  }));
+  $('#skipEar').addEventListener('click', () => {
+    app.ear.skipped = true;
+    const fb = $('#earFeedback');
+    fb.className = 'feedback';
+    fb.textContent = 'Ear side not tested. The result will say so.';
+    sync();
+  });
+
+  const scratchBtn = $('#scratchBtn');
+  const miniBars = $$('#miniMeter span');
+  $('#iveSet').addEventListener('click', () => {
+    $('#settingsCard').hidden = true;
+    $('#scratchCard').hidden = false;
+    const screen = $('#scratchCard').closest('.screen');
+    if (screen) screen.scrollTop = 0;
+    scratchBtn.focus();
+  });
+  scratchBtn.addEventListener('click', () => {
+    if (app.mic.busy) return;
+    app.mic.busy = true;
+    scratchBtn.disabled = true;
+    const card = $('#scratchCard');
+    card.classList.add('scratching');
+    const fb = $('#scratchFeedback');
+    fb.className = 'feedback';
+    fb.textContent = 'Listening for the scratch…';
+    let n = 0;
+    const timer = setInterval(() => {
+      miniBars.forEach((b, i) => {
+        const h = i === 5 + (n % 2) ? 70 + Math.random() * 25 : 6 + Math.random() * 14;
+        b.style.height = h + '%';
+      });
+      n++;
+    }, 80);
+    setTimeout(() => {
+      clearInterval(timer);
+      card.classList.remove('scratching');
+      miniBars.forEach(b => { b.style.height = '8%'; });
+      app.mic.verified = true;
+      fb.className = 'feedback success';
+      fb.textContent = 'Left microphone confirmed.';
+      scratchBtn.disabled = false;
+      app.mic.busy = false;
+      sync();
+    }, 1300);
+  });
+  $('#skipMic').addEventListener('click', () => {
+    app.mic.skipped = true;
+    const fb = $('#scratchFeedback');
+    fb.className = 'feedback';
+    fb.textContent = 'Side check skipped. The comparison will show as Not tested.';
+    sync();
+  });
+
+  const CIRC = 2 * Math.PI * 92;
+  const liveCircle = $('.ring .live');
+  liveCircle.style.strokeDashoffset = String(CIRC);
+  const bars = $$('#spectrum span');
+  bars.forEach(b => { b.style.height = '6%'; });
+
+  function setRing(pct) {
+    liveCircle.style.strokeDashoffset = String(CIRC * (1 - pct / 100));
+  }
+  function setBars(pct) {
+    bars.forEach((b, i) => {
+      const h = Math.max(6, Math.min(96, pct * 0.6 + Math.sin(i * 1.7 + pct / 8) * 18 + Math.random() * 12));
+      b.style.height = h + '%';
+    });
+  }
+
+  function setEarStrip(left, right) {
+    const pairs = [[$('#leftEar'), left], [$('#rightEar'), right]];
+    pairs.forEach(([card, state]) => {
+      card.classList.toggle('active', state === 'live');
+      card.classList.toggle('done', state === 'done');
+      const label = card.querySelector('strong');
+      label.textContent = state === 'done' ? 'Done' : state === 'live' ? 'Live' : 'Next';
+    });
+  }
+
+  const holdBtn = $('#holdBtn');
+  const seeResult = $('#seeResult');
+  let holdTimeout = null;
+  let holdInterval = null;
+
+  function beginListening() {
+    const phase = app.measure.phase;
+    const started = Date.now();
+    holdInterval = setInterval(() => {
+      const t = (Date.now() - started) / 3200;
+      const pct = 46 + Math.sin(t * Math.PI * 4) * 9 + Math.random() * 7;
+      setRing(pct);
+      setBars(pct);
+      $('#dbValue').textContent = (-26 - pct * 0.32).toFixed(1);
+    }, 90);
+    holdTimeout = setTimeout(() => {
+      clearInterval(holdInterval);
+      app.measure.captured[phase] = true;
+      app.measure.busy = false;
+      setRing(58);
+      setBars(58);
+      $('#dbValue').textContent = phase === 0 ? '-18.4' : '-19.1';
+      $('#ringLabel').textContent = 'CAPTURED';
+      if (phase === 0) {
+        app.measure.phase = 1;
+        $('#phaseChip').textContent = app.measure.side === 'left' ? 'LEFT · PHASE B · 3–6.5 kHz' : 'RIGHT · PHASE B · 3–6.5 kHz';
+        $('#prompt').textContent = 'Say "Ssss" for three seconds';
+        holdBtn.disabled = false;
+        holdBtn.textContent = 'Start hold';
+        $('#sideRead').textContent = (app.measure.side === 'left' ? 'LEFT' : 'RIGHT') + ' · LF captured';
+      } else if (app.measure.side === 'left') {
+        holdBtn.hidden = true;
+        $('#switchSummary').hidden = false;
+        $('#switchEar').hidden = false;
+        $('.screen[data-step="4"]').classList.add('switching');
+        $('#prompt').textContent = 'Left ear captured';
+        $('#measureHint').textContent = 'Switch the microphone to Right in Settings, then confirm below.';
+        $('#phaseChip').textContent = 'LEFT EAR · DONE';
+        $('#ringLabel').textContent = 'LEFT DONE';
+        $('#sideRead').textContent = 'LEFT · captured';
+        setEarStrip('done', 'next');
+      } else {
+        app.measure.done = true;
+        holdBtn.hidden = true;
+        seeResult.hidden = false;
+        $('#prompt').textContent = 'Right ear captured';
+        $('#measureHint').textContent = 'Both ears are measured. See the result.';
+        $('#phaseChip').textContent = 'RIGHT EAR · DONE';
+        $('#ringLabel').textContent = 'RIGHT DONE';
+        $('#sideRead').textContent = 'RIGHT · captured';
+        setEarStrip('done', 'done');
+      }
+      sync();
+    }, 3200);
+  }
+
+  holdBtn.addEventListener('click', () => {
+    if (app.measure.busy || app.measure.phase > 1) return;
+    app.measure.busy = true;
+    holdBtn.disabled = true;
+    holdBtn.textContent = 'Get ready…';
+    $('#ringLabel').textContent = '3';
+    setRing(0);
+    let n = 3;
+    const countdown = setInterval(() => {
+      n--;
+      if (n > 0) {
+        $('#ringLabel').textContent = String(n);
+      } else {
+        clearInterval(countdown);
+        holdBtn.textContent = 'Listening…';
+        $('#ringLabel').textContent = 'LISTENING';
+        beginListening();
+      }
+    }, 500);
+  });
+  seeResult.addEventListener('click', () => go(5));
+  $('#confirmRight').addEventListener('click', () => {
+    if (app.measure.busy) return;
+    app.measure.busy = true;
+    const btn = $('#confirmRight');
+    btn.disabled = true;
+    btn.textContent = 'Listening…';
+    const fb = $('#rightFeedback');
+    fb.className = 'feedback';
+    fb.textContent = 'Listening for the scratch…';
+    setTimeout(() => {
+      app.measure.busy = false;
+      app.measure.side = 'right';
+      app.measure.phase = 0;
+      app.measure.captured = [false, false];
+      $('#switchEar').hidden = true;
+      $('#switchSummary').hidden = true;
+      $('.screen[data-step="4"]').classList.remove('switching');
+      $('#seeResult').hidden = true;
+      holdBtn.hidden = false;
+      holdBtn.disabled = false;
+      holdBtn.textContent = 'Start hold';
+      $('#prompt').textContent = 'Say "Ahhh" for three seconds';
+      $('#measureHint').textContent = 'Hold a steady, comfortable voice. We listen to one microphone at a time.';
+      $('#phaseChip').textContent = 'RIGHT · PHASE A · 150–800 Hz';
+      $('#ringLabel').textContent = 'READY';
+      $('#dbValue').textContent = '—';
+      $('#sideRead').textContent = 'RIGHT · —';
+      setRing(0);
+      bars.forEach(b => { b.style.height = '6%'; });
+      setEarStrip('done', 'live');
+      btn.disabled = false;
+      btn.textContent = 'Confirm right microphone';
+      fb.className = 'feedback success';
+      fb.textContent = 'Right microphone confirmed.';
+    }, 1200);
+  });
+
+  function resetMeasure() {
+    clearTimeout(holdTimeout);
+    clearInterval(holdInterval);
+    app.measure = { side: 'left', phase: 0, captured: [false, false], busy: false, done: false };
+    holdBtn.hidden = false;
+    holdBtn.disabled = false;
+    holdBtn.textContent = 'Start hold';
+    seeResult.hidden = true;
+    $('#switchEar').hidden = true;
+    $('#switchSummary').hidden = true;
+    $('.screen[data-step="4"]').classList.remove('switching');
+    $('#confirmRight').disabled = false;
+    $('#confirmRight').textContent = 'Confirm right microphone';
+    $('#rightFeedback').textContent = '';
+    $('#phaseChip').textContent = 'LEFT · PHASE A · 150–800 Hz';
+    $('#prompt').textContent = 'Say "Ahhh" for three seconds';
+    $('#measureHint').textContent = 'Hold a steady, comfortable voice. We listen to one microphone at a time.';
+    $('#ringLabel').textContent = 'READY';
+    $('#dbValue').textContent = '—';
+    $('#sideRead').textContent = 'LEFT · —';
+    setRing(0);
+    bars.forEach(b => { b.style.height = '6%'; });
+    setEarStrip('live', 'next');
+    go(4);
+    sync();
+  }
+
+  $('#testAgain').addEventListener('click', resetMeasure);
+  $('#saveResult').addEventListener('click', () => { $('#saveNote').hidden = false; });
+
+  $('#startTimer').addEventListener('click', () => {
+    const card = $('#timerCard');
+    card.classList.add('running');
+    $('#timerValue').textContent = '1:59:59';
+    $('#startTimer').disabled = true;
+    $('#startTimer').textContent = 'Timer running';
+    $('#demoUnlock').hidden = false;
+  });
+  $('#demoUnlock').addEventListener('click', () => {
+    $('#timerCard').classList.remove('running');
+    $('#timerValue').textContent = 'Ready';
+    $('#timerCard').querySelector('.timerbar span').style.width = '100%';
+    $('#startTimer').hidden = true;
+    $('#demoUnlock').hidden = true;
+    $('#retest').hidden = false;
+  });
+  $('#retest').addEventListener('click', resetMeasure);
+
+  function finish() {
+    app.finished = true;
+    $('#finish').hidden = false;
+    sync();
+  }
+  $('#startOver').addEventListener('click', () => location.reload());
+
+  sync();
+})();
+</script>
+</body>
+</html>
