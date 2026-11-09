@@ -83,9 +83,11 @@ Swedish version:
     This signs and installs the app without SideStore sign-in. The 7-day refresh then
     needs iloader again until SideStore works.
   - Fix the on-device login later: SideStore → **Settings → User Customizations** → turn
-    off **On-Device Anisette**, pick a working anisette server, reset `adi.pb`, fully
-    close SideStore, then retry with the **same Apple ID used in iloader**. Do not retry
-    many times in a row; Apple rate-limits with 429/503.
+    off **On-Device Anisette**, restart SideStore, then **Settings → Anisette Servers →
+    Refresh Servers** and pick **SideStore (New)** from the official list. Turn off
+    **Enable Auto Rotation**, run **Reset adi.pb**, fully close SideStore, then retry with
+    the **same Apple ID used in iloader**. Do not retry many times in a row; Apple
+    rate-limits with 429/503.
 - **SideStore shows an error:** send the exact error text or a screenshot. Do not send
   passwords or two-factor codes.
 - **SideStore says “no ipsec/IKEv2 interface found” on iOS 26.4 or later:** use a remote
