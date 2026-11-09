@@ -1,7 +1,8 @@
 # Phase 1 interactive mockup
 
-`phase1-interactive.html` is a self-contained design mockup for the Phase 1 guided flow.
-Open it in a browser. It uses **example data**; it is not a measurement and not the app.
+The mockup lives at `web/mockup.html` and is published at
+<https://voccov.github.io/soniccare-pro/mockup.html>. It uses **example data**; it is not
+a measurement and not the app.
 
 The seven segments at the top jump between screens. The in-screen buttons drive the flow:
 the readiness checklist unlocks Continue, the left ping asks which ear, the Settings path

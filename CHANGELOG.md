@@ -17,9 +17,10 @@ semver.
 - Phase 1 interaction direction: readiness and fit-test prompt, ear-identity ping,
   one-microphone-at-a-time measurement with two ear cards, target-level ring, vector
   animation, and no PiP in the MVP.
-- `docs/mockups/phase1-interactive.html`: a clickable Phase 1 flow mockup with example
-  data, covering readiness, ear ping, inline Settings and scratch, both measurement
-  phases, the right-ear switch, result and cleaning.
+- `web/mockup.html`: a clickable Phase 1 flow mockup with example data, covering
+  readiness, ear ping, inline Settings and scratch, both measurement phases, the
+  right-ear switch, result and cleaning. Published at
+  <https://voccov.github.io/soniccare-pro/mockup.html>.
 
 ### Changed
 

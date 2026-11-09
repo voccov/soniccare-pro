@@ -47,3 +47,9 @@ URL.
 
 No uploads, accounts, analytics, third-party scripts or persisted audio. Results are
 stored in `localStorage` on the phone and exported only when you tap Export.
+
+## Phase 1 mockup
+
+`mockup.html` is a clickable design mockup of the planned guided flow. It uses example
+data, is not a measurement, and is not linked from the PWA. It exists for design review.
+

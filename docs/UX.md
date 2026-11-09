@@ -54,8 +54,9 @@ Start
 - **Acoustic loopback is an experiment.** A tone or sweep played through the AirPods while
   the HFP microphone is active is tested in the PWA first. It becomes a feature only if
   the data shows a repeatable per-ear response; until then the voice SVR is the method.
-- **Interactive mockup:** `docs/mockups/phase1-interactive.html` (example data; not a
-  measurement). Use it to review the flow and motion before native work.
+- **Interactive mockup:** `web/mockup.html`, published at
+  <https://voccov.github.io/soniccare-pro/mockup.html> (example data; not a measurement).
+  Use it to review the flow and motion before native work.
 
 ## Skip matrix
 

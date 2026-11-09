@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="icon" href="data:,">
 <title>SonicCare Pro — Phase 1 interactive mockup</title>
 <style>
@@ -25,11 +25,12 @@
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
-  body { font-family: var(--app-font); background: transparent; }
+  html { background: var(--app-bg); }
+  body { font-family: var(--app-font); background: var(--app-bg); color: var(--app-text); }
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
   .icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-  .stage { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 0 4px; }
-  .caption { margin: 0; color: var(--muted-foreground, #8E8E93); font-size: 11px; letter-spacing: .02em; }
+  .stage { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: max(16px, env(safe-area-inset-top)) 8px max(16px, env(safe-area-inset-bottom)); }
+  .caption { margin: 0; color: var(--app-tertiary); font-size: 11px; letter-spacing: .02em; }
   .phone {
     position: relative; width: min(390px, 100%); height: 760px;
     background: var(--app-bg); color: var(--app-text);
